@@ -1,7 +1,119 @@
 import SwiftUI
 import PhotosUI
 
+struct FloatingHeartView: View {
+    let heart: FloatingHeart
+    let onComplete: () -> Void
+    
+    var body: some View {
+        Image(systemName: "heart.fill")
+            .foregroundColor(Color(hex: "FF5A5F"))
+            .frame(width: 16, height: 16)
+            .scaleEffect(heart.scale)
+            .position(heart.position)
+            .opacity(heart.opacity)
+            .rotationEffect(.degrees(heart.rotation))
+            .onAppear {
+                animateHeart()
+            }
+    }
+    
+    private func animateHeart() {
+        withAnimation(
+            .easeInOut(duration: heart.animationDuration)
+            .delay(heart.animationDelay)
+        ) {
+            // Move upward with fade
+            let newPosition = CGPoint(
+                x: heart.position.x,
+                y: -50
+            )
+            
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + heart.animationDuration + heart.animationDelay
+            ) {
+                onComplete()
+            }
+        }
+    }
+}
+
+// MARK: - Hearts Container
+struct HeartsContainer: View {
+    let hearts: [FloatingHeart]
+    let onHeartComplete: (UUID) -> Void
+    
+    var body: some View {
+        ForEach(hearts) { heart in
+            FloatingHeartView(heart: heart) {
+                onHeartComplete(heart.id)
+            }
+        }
+    }
+}
+
+// MARK: - Enchanted Hearts View
+struct EnchantedHeartsView: View {
+    @State private var hearts: [FloatingHeart] = []
+    @State private var isActive = true
+    
+    private let maxHearts = 5
+    private let timer = Timer.publish(every: 1.8, on: .main, in: .common).autoconnect()
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                HeartsContainer(hearts: hearts) { heartId in
+                    hearts.removeAll { $0.id == heartId }
+                }
+            }
+            .onReceive(timer) { _ in
+                addNewHeartIfNeeded(in: geometry)
+            }
+            .onAppear { isActive = true }
+            .onDisappear {
+                isActive = false
+                hearts.removeAll()
+            }
+        }
+    }
+    
+    private func addNewHeartIfNeeded(in geometry: GeometryProxy) {
+        guard isActive && hearts.count < maxHearts else { return }
+        
+        let newHeart = createHeart(in: geometry)
+        hearts.append(newHeart)
+    }
+    
+    private func createHeart(in geometry: GeometryProxy) -> FloatingHeart {
+        FloatingHeart(
+            position: CGPoint(
+                x: CGFloat.random(in: 50...(geometry.size.width - 50)),
+                y: geometry.size.height + 20
+            ),
+            scale: CGFloat.random(in: 0.4...0.6),
+            opacity: 0.3,
+            rotation: Double.random(in: -30...30),
+            animationDuration: Double.random(in: 8...12),
+            animationDelay: Double.random(in: 0...0.5)
+        )
+    }
+}
+
+// MARK: - Floating Heart Model
+struct FloatingHeart: Identifiable, Equatable {
+    let id = UUID()
+    var position: CGPoint
+    var scale: CGFloat
+    var opacity: Double
+    var rotation: Double
+    var animationDuration: Double
+    var animationDelay: Double
+}
+
+// MARK: - Welcome View
 struct WelcomeView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("isFirstTimeUser") private var isFirstTimeUser = true
     @AppStorage("partnerName") private var partnerName = ""
     
@@ -17,20 +129,28 @@ struct WelcomeView: View {
     @State private var tempUIImage: UIImage?
     @FocusState private var isNameFieldFocused: Bool
     
+    private struct TextSize {
+        static let mainTitle: CGFloat = 40
+        static let actionPrompt: CGFloat = 20
+        static let placeholder: CGFloat = 20
+        static let button: CGFloat = 18
+    }
+    
     private let steps = [
-        "Welcome to Puchi",
-        "Let's create your\nlove journal",
-        "Who's your special\nsomeone?"
+        "Welcome to Your\nLove Story",
+        "Let's Create Your\nLove Journey\nTogether",
+        "Tell Me About Your\nSpecial Someone"
     ]
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Background
-                Color.puchiBackground
+                Color.white
                     .edgesIgnoringSafeArea(.all)
                 
-                // Dismiss keyboard on tap
+                EnchantedHeartsView()
+                    .allowsHitTesting(false)
+                
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture {
@@ -38,200 +158,60 @@ struct WelcomeView: View {
                     }
                 
                 VStack(spacing: 0) {
-                    // Top padding for content
                     Spacer()
-                        .frame(height: geometry.safeAreaInsets.top + 8)
+                        .frame(height: geometry.size.height * 0.15)
                     
-                    // Main content
-                    VStack(spacing: 0) { // Removed default spacing
-                        // Reduced top spacing
-                        Spacer()
-                            .frame(height: geometry.size.height * 0.02)
+                    if currentStep < 2 {
+                        Image(systemName: "heart.fill")
+                            .resizable()
+                            .frame(width: 44, height: 40)
+                            .foregroundColor(Color(hex: "FF5A5F"))
+                            .padding(.bottom, 24)
                         
-                        // Heart Logo or Selected Photo
-                        if currentStep < 2 {
-                            Image(systemName: "heart.fill")
-                                .resizable()
-                                .frame(width: 60, height: 54)
-                                .foregroundColor(.puchiPrimary) // Updated color
-                                .opacity(opacity)
-                                .animation(.easeIn(duration: 0.6).delay(0.3), value: opacity)
-                        } else {
-                            VStack(spacing: 24) { // Adjusted spacing
-                                if isImageLoading {
-                                    ProgressView()
-                                        .frame(width: 120, height: 120)
-                                } else if let partnerImage {
-                                    ZStack(alignment: .topTrailing) {
-                                        partnerImage
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 120, height: 120)
-                                            .clipShape(Circle())
-                                            .overlay(Circle().stroke(Color(hex: "FF5A5F"), lineWidth: 3))
-                                        
-                                        // Remove photo button
-                                        Button(action: {
-                                            withAnimation {
-                                                self.partnerImage = nil
-                                                self.selectedPhoto = nil
-                                                self.tempUIImage = nil
-                                            }
-                                        }) {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .foregroundColor(Color(hex: "FF5A5F"))
-                                                .background(Color.white.clipShape(Circle()))
-                                        }
-                                        .offset(x: 8, y: -8)
-                                    }
-                                } else {
-                                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                                        VStack {
-                                            Image(systemName: "person.circle.fill")
-                                                .resizable()
-                                                .frame(width: 120, height: 120)
-                                                .foregroundColor(Color(hex: "FF5A5F").opacity(0.3))
-                                            
-                                            Text("Add photo")
-                                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                                .foregroundColor(Color(hex: "FF5A5F"))
-                                        }
-                                    }
-                                    .accessibilityLabel("Add partner photo")
-                                }
-                            }
-                            .padding(.bottom, 24) // Adjusted bottom padding
+                        Text(steps[currentStep])
+                            .font(.system(size: TextSize.mainTitle, weight: .bold))
+                            .foregroundColor(Color(hex: "FF5A5F"))
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .transition(.opacity)
+                            .padding(.horizontal, 24)
+                    } else {
+                        VStack(spacing: 32) {
+                            photoSection
+                                .padding(.bottom, 16)
+                            
+                            Text(steps[currentStep])
+                                .font(.system(size: TextSize.mainTitle, weight: .bold))
+                                .foregroundColor(Color(hex: "FF5A5F"))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 24)
+                            
+                            inputField
+                                .padding(.top, 16)
                         }
-                        
-                        // Main Content
-                        VStack(spacing: 24) {
-                            if currentStep < 2 {
-                                Text(steps[currentStep])
-                                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(hex: "FF5A5F"))
-                                    .multilineTextAlignment(.center)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .transition(.opacity)
-                            } else {
-                                VStack(spacing: 32) {
-                                    Text(steps[currentStep])
-                                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                                        .foregroundColor(Color(hex: "FF5A5F"))
-                                        .multilineTextAlignment(.center)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                    
-                                    ZStack(alignment: .center) {
-                                        if name.isEmpty {
-                                            Text("Enter their name")
-                                                .font(.system(size: 20, design: .rounded))
-                                                .foregroundColor(Color(.systemGray3))
-                                        }
-                                        
-                                        TextField("", text: $name)
-                                            .font(.system(size: 20, design: .rounded))
-                                            .multilineTextAlignment(.center)
-                                            .focused($isNameFieldFocused)
-                                            .submitLabel(.done)
-                                            .textContentType(.name)
-                                    }
-                                    .frame(maxWidth: 250)
-                                    .padding(.vertical, 16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.white)
-                                            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-                                    )
-                                }
-                                .transition(.opacity)
-                            }
-                        }
-                        .animation(.easeInOut, value: currentStep)
-                        
-                        Spacer()
                     }
-                    .padding(.horizontal)
                     
-                    // Fixed bottom button container
-                    VStack {
-                        Spacer()
-                        
-                        // Navigation Button
-                        Button(action: {
-                            HapticManager.medium() // Add haptic feedback
-                            if currentStep < 2 {
-                                withAnimation(PuchiAnimation.spring) { // Use our custom animation
-                                    currentStep += 1
-                                }
-                                // Delay keyboard focus to prevent animation conflict
-                                if currentStep == 2 {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                                        isNameFieldFocused = true
-                                    }
-                                }
-                            } else {
-                                guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                                isNameFieldFocused = false
-                                HapticManager.success() // Add success haptic
-                                withAnimation(PuchiAnimation.spring) {
-                                    partnerName = name
-                                    isFirstTimeUser = false
-                                }
-                            }
-                        }) {
-                            HStack {
-                                Text(currentStep == 2 ? "Start Journey" : "Continue")
-                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                
-                                if currentStep < 2 {
-                                    Image(systemName: "arrow.right")
-                                        .font(.system(size: 18, weight: .semibold))
-                                } else {
-                                    Image(systemName: "heart.fill")
-                                        .font(.system(size: 18, weight: .semibold))
-                                }
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(
-                                name.isEmpty && currentStep == 2 ?
-                                Color(hex: "FF5A5F").opacity(0.6) :
-                                    Color(hex: "FF5A5F")
-                            )
-                            .cornerRadius(16)
-                            .shadow(
-                                color: Color(hex: "FF5A5F").opacity(0.3),
-                                radius: 10,
-                                x: 0,
-                                y: 4
-                            )
-                            .buttonStyle(PressableButtonStyle()) // Add pressable style
-                        }
-                        .disabled(name.isEmpty && currentStep == 2)
+                    Spacer()
+                    
+                    navigationButton
                         .padding(.horizontal, 24)
                         .padding(.bottom, geometry.safeAreaInsets.bottom + 16)
-                    }
-                    .animation(.none, value: keyboardHeight) // Prevent button from animating with keyboard
                 }
             }
         }
-        .onChange(of: selectedPhoto) { oldItem, newItem in
+        .onChange(of: selectedPhoto) { _, newItem in
             Task {
                 isImageLoading = true
                 do {
                     if let data = try await newItem?.loadTransferable(type: Data.self) {
                         if let uiImage = UIImage(data: data) {
-                            // Store temporary image
                             tempUIImage = uiImage
                             showPhotoConfirmation = true
                         } else {
                             showImageError = true
                         }
-                    } else {
-                        // Handle case where no data was loaded
-                        if newItem != nil {
-                            showImageError = true
-                        }
+                    } else if newItem != nil {
+                        showImageError = true
                     }
                 } catch {
                     showImageError = true
@@ -240,55 +220,190 @@ struct WelcomeView: View {
             }
         }
         .alert("Image Error", isPresented: $showImageError) {
-                    Button("OK", role: .cancel) { }
-                } message: {
-                    Text("There was an error loading your image. Please try again.")
-                }
-                .alert("Confirm Photo", isPresented: $showPhotoConfirmation) {
-                    Button("Use Photo") {
-                        if let uiImage = tempUIImage,
-                           let optimizedData = uiImage.optimizedForStorage() {
-                            UserDefaults.standard.set(optimizedData, forKey: "partnerImageData")
-                            withAnimation {
-                                partnerImage = Image(uiImage: uiImage)
-                            }
-                        }
-                    }
-                    Button("Cancel", role: .cancel) {
-                        selectedPhoto = nil
-                        tempUIImage = nil
-                    }
-                } message: {
-                    Text("Would you like to use this photo?")
-                }
-                .onAppear {
-                    // Load existing partner image if available
-                    if let data = UserDefaults.standard.data(forKey: "partnerImageData"),
-                       let uiImage = UIImage(data: data) {
-                        partnerImage = Image(uiImage: uiImage)
-                    }
-                    
-                    opacity = 1.0
-                    
-                    // Set up keyboard notifications
-                    NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
-                        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                            keyboardHeight = keyboardFrame.height
-                        }
-                    }
-                    
-                    NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
-                        keyboardHeight = 0
-                    }
-                }
-                .preferredColorScheme(.light)
-            }
-            
-        #if DEBUG
-            struct WelcomeView_Previews: PreviewProvider {
-                static var previews: some View {
-                    WelcomeView()
-                }
-            }
-        #endif
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("There was an error loading your image. Please try again.")
         }
+        .alert("Confirm Photo", isPresented: $showPhotoConfirmation) {
+            Button("Use Photo") { handlePhotoConfirmation() }
+            Button("Cancel", role: .cancel) { cancelPhotoSelection() }
+        } message: {
+            Text("Would you like to use this photo?")
+        }
+        .onAppear {
+            loadSavedImage()
+            setupKeyboardNotifications()
+            opacity = 1.0
+        }
+    }
+    
+    private var photoSection: some View {
+        VStack(spacing: 16) {
+            if isImageLoading {
+                ProgressView()
+                    .frame(width: 80, height: 80)
+            } else if let partnerImage {
+                ZStack(alignment: .topTrailing) {
+                    partnerImage
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 80, height: 80)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color(hex: "FF5A5F"), lineWidth: 3))
+                    
+                    Button(action: { clearPhoto() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color(hex: "FF5A5F"))
+                            .background(Color.white.clipShape(Circle()))
+                    }
+                    .offset(x: 8, y: -8)
+                }
+            } else {
+                PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                    VStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(Color(hex: "FF5A5F").opacity(0.1))
+                                .frame(width: 80, height: 80)
+                            
+                            Image(systemName: "heart.fill")
+                                .resizable()
+                                .frame(width: 32, height: 28)
+                                .foregroundColor(.white)
+                        }
+                        
+                        Text("Add a photo of your love")
+                            .font(.system(size: TextSize.actionPrompt))
+                            .foregroundColor(Color(hex: "FF5A5F"))
+                    }
+                }
+            }
+        }
+    }
+    
+    private var inputField: some View {
+        TextField("", text: $name)
+            .font(.system(size: TextSize.placeholder))
+            .multilineTextAlignment(.center)
+            .focused($isNameFieldFocused)
+            .submitLabel(.done)
+            .placeholder(when: name.isEmpty) {
+                Text("Their name goes here...")
+                    .font(.system(size: TextSize.placeholder))
+                    .foregroundColor(Color(.systemGray3))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.05), radius: 8, y: 4)
+            )
+            .padding(.horizontal, 24)
+    }
+    
+    private var navigationButton: some View {
+        Button(action: handleNavigation) {
+            HStack(spacing: 8) {
+                Text(currentStep == 2 ? "Begin Your Journey" : "Next Step")
+                    .font(.system(size: TextSize.button, weight: .semibold))
+                
+                Image(systemName: currentStep == 2 ? "heart.fill" : "arrow.right")
+                    .font(.system(size: TextSize.button, weight: .semibold))
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(
+                RoundedRectangle(cornerRadius: 28)
+                    .fill(Color(hex: "FF5A5F"))
+            )
+        }
+        .disabled(currentStep == 2 && name.isEmpty)
+    }
+    
+    private func handleNavigation() {
+        if currentStep < 2 {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                currentStep += 1
+            }
+            if currentStep == 2 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    isNameFieldFocused = true
+                }
+            }
+        } else {
+            guard !name.isEmpty else { return }
+            isNameFieldFocused = false
+            withAnimation {
+                partnerName = name
+                isFirstTimeUser = false
+            }
+        }
+    }
+    
+    private func handlePhotoConfirmation() {
+        guard let uiImage = tempUIImage,
+              let optimizedData = uiImage.optimizedForStorage() else { return }
+        
+        UserDefaults.standard.set(optimizedData, forKey: "partnerImageData")
+        withAnimation {
+            partnerImage = Image(uiImage: uiImage)
+        }
+    }
+    
+    private func cancelPhotoSelection() {
+        selectedPhoto = nil
+        tempUIImage = nil
+    }
+    
+    private func clearPhoto() {
+        withAnimation {
+            partnerImage = nil
+            selectedPhoto = nil
+            tempUIImage = nil
+            UserDefaults.standard.removeObject(forKey: "partnerImageData")
+        }
+    }
+    
+    private func loadSavedImage() {
+        if let data = UserDefaults.standard.data(forKey: "partnerImageData"),
+           let uiImage = UIImage(data: data) {
+            partnerImage = Image(uiImage: uiImage)
+        }
+    }
+    
+    private func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillShowNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                keyboardHeight = keyboardFrame.height
+            }
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillHideNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            keyboardHeight = 0
+        }
+    }
+}
+
+// MARK: - Helper Extensions
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .center,
+        @ViewBuilder placeholder: () -> Content
+    ) -> some View {
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
+        }
+    }
+}
