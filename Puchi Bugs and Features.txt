@@ -1,0 +1,18 @@
+Puchi to do:
+
+
+Main View:
+1. Fix keyboard not dismissing on tap or on swipe.
+2. Centre Media and Location Buttons.
+3. Make the love streak smaller, perhaps the words on one line to allow for a much thinner card.
+4. Instead of scrolling to view all notes, have a swipe gesture to the right move to another view, where the love note history view is displayed. 
+5. Have page dots at the bottom indicating which page they're on.
+6. Location button still does not work. I cannot tap it successfully, I am not prompted to allow my location, and the location is not being recorded.
+7. If I am moving the love note recents and history to another view, make the Today's love note card larger to reduce white space.
+8. When I reset the app under "App Management", the user's image is still visible during the new onboarding experience.
+
+
+1. make the Today's love note card larger to reduce white space.
+2. When I reset the app under "App Management", the user's image is still visible during the new onboarding experience.
+3. Have page dots at the bottom indicating which page they're on.
+4. Location button still does not work. I cannot tap it successfully, I am not prompted to allow my location, and the location is not being recorded.

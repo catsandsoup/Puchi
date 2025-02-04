@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Puchi allows users to include photos in their Love Notes.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Puchi allows users to automatically record the location of their Love Note</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Puchi allows users to automatically record the location of their Love Note</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Puchi allows users to automatically record the location of their Love Note</string>
+</dict>
+</plist>
