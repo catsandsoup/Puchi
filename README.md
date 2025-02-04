@@ -1,7 +1,5 @@
 # Puchi
 
-<img src="/api/placeholder/120/120" alt="Puchi App Icon" align="right" />
-
 Puchi is an elegant iOS app designed to help couples create, cherish, and preserve their love story through digital love notes and memories.
 
 ## ✨ Features
