@@ -29,7 +29,10 @@ struct NoteEntryView: View {
                 .padding(.horizontal, 12)  // Adjust horizontal padding for alignment
                 .padding(.vertical, 8)    // Adjust vertical padding
                 .cornerRadius(8)
-                .frame(height: 275)  // Set height to match your design
+                .frame(height: 325)  // Increased to match MainContentView height
+                .onSubmit {
+                    isFocused = false
+                }
         }
         .background(Color.gray.opacity(0.1))  // Optional: background to highlight the area
         .cornerRadius(8)
@@ -58,7 +61,7 @@ struct NoteEntrySectionView: View {
             )
             .puchiInput()  // Any custom styling for inputs, if necessary
             .frame(maxWidth: .infinity)  // Ensure it expands horizontally
-            .frame(height: 275) // Adjust to your desired height
+            .frame(height: 325) // Increased to match MainContentView height
         }
         .padding()
         .background(

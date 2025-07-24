@@ -30,15 +30,15 @@ struct MainContent: View {
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundColor(.puchiPrimary)
                     
-                    // Note Input
+                    // Note Input - Increased size to reduce white space
                     NoteEntryView(
                         text: $viewModel.loveNote,
                         isFocused: _isTextFieldFocused,
                         placeholder: "Write something sweet for \(partnerName)..."
                     )
                     .puchiInput()
-                    .frame(maxWidth: .infinity) // Make sure the width is maximized
-                    .frame(height: 300) // You can adjust this height value to something larger
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 350) // Increased from 300 to 350 to reduce white space
                     
                     // Media Preview
                     if !viewModel.selectedImages.isEmpty || !viewModel.selectedVideos.isEmpty {
@@ -50,32 +50,35 @@ struct MainContent: View {
                         )
                     }
                     
-                    // Action Buttons
-                    HStack(spacing: 12) {
+                    // Action Buttons - Centered with improved layout
+                    HStack {
                         Spacer()
                         
-                        // Add Media Button
-                        Button(action: {
-                            HapticManager.medium()
-                            viewModel.showSourceTypeSheet = true
-                        }) {
-                            Label("Add Media", systemImage: "photo.fill")
+                        HStack(spacing: 32) {
+                            // Add Media Button
+                            Button(action: {
+                                HapticManager.medium()
+                                viewModel.showSourceTypeSheet = true
+                            }) {
+                                Label("Add Media", systemImage: "photo.fill")
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            }
+                            .buttonStyle(ScaleButtonStyle())
+                            
+                            // Add Location Button
+                            Button(action: {
+                                HapticManager.medium()
+                                viewModel.requestLocationPermission()
+                                viewModel.startCapturingLocation()
+                            }) {
+                                Label(
+                                    viewModel.currentLocation == nil ? "Add Location" : "Location Added",
+                                    systemImage: viewModel.currentLocation == nil ? "location" : "location.fill"
+                                )
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            }
+                            .buttonStyle(ScaleButtonStyle())
                         }
-                        .buttonStyle(ScaleButtonStyle())
-                        
-                        // Add Location Button
-                        Button(action: {
-                            HapticManager.medium()
-                            viewModel.startCapturingLocation()
-                        }) {
-                            Label(
-                                viewModel.currentLocation == nil ? "Add Location" : "Location Added",
-                                systemImage: viewModel.currentLocation == nil ? "location" : "location.fill"
-                            )
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        }
-                        .buttonStyle(ScaleButtonStyle())
                         
                         Spacer()
                     }
@@ -130,6 +133,12 @@ struct MainContent: View {
         .onTapGesture {
             isTextFieldFocused = false
         }
+        .gesture(
+            DragGesture()
+                .onChanged { _ in
+                    isTextFieldFocused = false
+                }
+        )
         .sheet(isPresented: $viewModel.showSourceTypeSheet) {
             MediaPicker(
                 sourceType: viewModel.selectedSourceType,

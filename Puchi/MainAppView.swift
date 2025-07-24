@@ -34,7 +34,18 @@ struct MainAppView: View {
                 .onChange(of: currentPage) { oldValue, newValue in
                     // Add haptic feedback when changing pages
                     HapticManager.light()
+                    // Dismiss keyboard when changing pages
+                    isTextFieldFocused = false
                 }
+                .onTapGesture {
+                    isTextFieldFocused = false
+                }
+                .gesture(
+                    DragGesture()
+                        .onChanged { _ in
+                            isTextFieldFocused = false
+                        }
+                )
                 
                 // Custom Page Indicator
                 AnimatedPageIndicator(currentPage: $currentPage, numberOfPages: 2)

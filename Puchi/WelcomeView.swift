@@ -367,6 +367,15 @@ struct WelcomeView: View {
     }
     
     private func loadSavedImage() {
+        // Only load saved image if this is not a first-time user
+        // This prevents the partner image from persisting after app reset
+        guard !isFirstTimeUser else {
+            // Clear any existing partner image data if this is first time user
+            UserDefaults.standard.removeObject(forKey: "partnerImageData")
+            partnerImage = nil
+            return
+        }
+        
         if let data = UserDefaults.standard.data(forKey: "partnerImageData"),
            let uiImage = UIImage(data: data) {
             partnerImage = Image(uiImage: uiImage)

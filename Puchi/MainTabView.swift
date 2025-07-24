@@ -53,6 +53,15 @@ struct MainTabView: View {
                 isTextFieldFocused: _isTextFieldFocused
             )
             .tag(0)
+            .onTapGesture {
+                isTextFieldFocused = false
+            }
+            .gesture(
+                DragGesture()
+                    .onChanged { _ in
+                        isTextFieldFocused = false
+                    }
+            )
             
             NotesHistoryPage(notes: viewModel.savedNotes, viewModel: viewModel)
                 .tag(1)

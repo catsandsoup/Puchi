@@ -66,8 +66,21 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     }
     
     func startCapturingLocation() {
-        isCapturingLocation = true
-        locationManager.startUpdatingLocation()
+        let authStatus = locationManager.authorizationStatus
+        
+        switch authStatus {
+        case .notDetermined:
+            requestLocationPermission()
+        case .denied, .restricted:
+            print("Location access denied")
+            return
+        case .authorizedWhenInUse, .authorizedAlways:
+            isCapturingLocation = true
+            locationManager.startUpdatingLocation()
+        @unknown default:
+            print("Unknown location authorization status")
+            return
+        }
     }
     
     func stopCapturingLocation() {
@@ -211,6 +224,24 @@ extension LoveJournalViewModel: CLLocationManagerDelegate {
         Task { @MainActor in
             print("Location error: \(error.localizedDescription)")
             self.isCapturingLocation = false
+        }
+    }
+    
+    nonisolated func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        Task { @MainActor in
+            switch status {
+            case .authorizedWhenInUse, .authorizedAlways:
+                if self.isCapturingLocation {
+                    manager.startUpdatingLocation()
+                }
+            case .denied, .restricted:
+                self.isCapturingLocation = false
+                print("Location access denied")
+            case .notDetermined:
+                break
+            @unknown default:
+                break
+            }
         }
     }
 }
