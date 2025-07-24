@@ -15,28 +15,43 @@ struct NoteEntryView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Placeholder text
+            // Background with seamless design
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.background)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            isFocused ? Color.puchiPrimary.opacity(0.3) : Color.clear,
+                            lineWidth: 1
+                        )
+                )
+                .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
+            
+            // Placeholder text with better styling
             if text.isEmpty {
                 Text(placeholder)
-                    .foregroundColor(.gray)
-                    .padding(.leading, 12)  // Adjust horizontal padding for alignment
-                    .padding(.top, 8)      // Adjust vertical padding for alignment
+                    .font(.system(size: 17, design: .rounded))
+                    .foregroundColor(.textSecondary.opacity(0.6))
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                    .allowsHitTesting(false)
             }
             
-            // TextEditor for user input
+            // TextEditor with seamless styling like Tinder
             TextEditor(text: $text)
-                .focused($isFocused)  // Bind to FocusState
-                .padding(.horizontal, 12)  // Adjust horizontal padding for alignment
-                .padding(.vertical, 8)    // Adjust vertical padding
-                .cornerRadius(8)
-                .frame(height: 325)  // Increased to match MainContentView height
+                .focused($isFocused)
+                .font(.system(size: 17, design: .rounded))
+                .foregroundColor(.textPrimary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color.clear)
+                .scrollContentBackground(.hidden)
                 .onSubmit {
                     isFocused = false
                 }
         }
-        .background(Color.gray.opacity(0.1))  // Optional: background to highlight the area
-        .cornerRadius(8)
-        .padding(.horizontal)  // Optional: Adjust container padding
+        .frame(height: 380) // Increased height for better user experience
+        .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }
 
@@ -53,15 +68,13 @@ struct NoteEntrySectionView: View {
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .foregroundColor(.puchiPrimary)
             
-            // NoteEntryView with binding for loveNote
+            // NoteEntryView with seamless styling
             NoteEntryView(
                 text: $loveNote,
                 isFocused: _isTextFieldFocused,
                 placeholder: "Write something sweet for \(partnerName)..."
             )
-            .puchiInput()  // Any custom styling for inputs, if necessary
-            .frame(maxWidth: .infinity)  // Ensure it expands horizontally
-            .frame(height: 325) // Increased to match MainContentView height
+            .frame(maxWidth: .infinity)
         }
         .padding()
         .background(

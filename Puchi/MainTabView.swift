@@ -7,30 +7,13 @@
 import SwiftUI
 import PhotosUI
 
-//Note History Page
-struct NotesHistoryPage: View {
+// Timeline Page - Enhanced timeline view with integrated display
+struct TimelinePage: View {
     let notes: [LoveNote]
     @StateObject var viewModel: LoveJournalViewModel
     
     var body: some View {
-        VStack(spacing: 16) {
-            Text("Love Note History")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(Color(hex: "FF5A5F"))
-                .padding(.top, 16)
-            
-            ScrollView {
-                LazyVStack(spacing: 16) {
-                    ForEach(Array(notes.enumerated()), id: \.element.id) { index, note in
-                        NoteCard(note: note) {
-                            viewModel.deleteNote(at: IndexSet([index]))
-                        }
-                    }
-                }
-                .padding(.horizontal, 16)
-            }
-        }
-        .background(Color(hex: "F5F5F5"))
+        TimelineView(notes: notes, viewModel: viewModel)
     }
 }
 
@@ -63,7 +46,7 @@ struct MainTabView: View {
                     }
             )
             
-            NotesHistoryPage(notes: viewModel.savedNotes, viewModel: viewModel)
+            TimelinePage(notes: viewModel.savedNotes, viewModel: viewModel)
                 .tag(1)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))

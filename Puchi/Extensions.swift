@@ -104,10 +104,10 @@ struct InputStyleModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.system(size: 17, design: .rounded))
-            .padding()
+            .padding(16)
             .background(Color.background)
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+            .cornerRadius(16)
+            .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
 }
 

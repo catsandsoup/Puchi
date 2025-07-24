@@ -29,5 +29,17 @@ struct NotesList: View {
             }
         }
         .background(Color(hex: "F5F5F5"))
+        .contentShape(Rectangle())
+        .onTapGesture {
+            // Dismiss any active keyboard when tapping in the notes view
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+        .gesture(
+            DragGesture()
+                .onChanged { _ in
+                    // Dismiss keyboard on swipe gestures
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+        )
     }
 }

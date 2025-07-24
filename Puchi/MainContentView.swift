@@ -24,21 +24,19 @@ struct MainContent: View {
                 StreakCardView(streakCount: viewModel.currentStreak)
                     .transition(.scale)
                 
-                // Love Note Section
-                VStack(alignment: .leading, spacing: 12) {
+                // Love Note Section - Increased size to reduce white space
+                VStack(alignment: .leading, spacing: 16) {
                     Text("Today's Love Note")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundColor(.puchiPrimary)
                     
-                    // Note Input - Increased size to reduce white space
+                    // Note Input - Seamless text input like Tinder
                     NoteEntryView(
                         text: $viewModel.loveNote,
                         isFocused: _isTextFieldFocused,
                         placeholder: "Write something sweet for \(partnerName)..."
                     )
-                    .puchiInput()
                     .frame(maxWidth: .infinity)
-                    .frame(height: 350) // Increased from 300 to 350 to reduce white space
                     
                     // Media Preview
                     if !viewModel.selectedImages.isEmpty || !viewModel.selectedVideos.isEmpty {
@@ -50,18 +48,22 @@ struct MainContent: View {
                         )
                     }
                     
-                    // Action Buttons - Centered with improved layout
+                    // Action Buttons - Properly centered with improved layout
                     HStack {
                         Spacer()
                         
-                        HStack(spacing: 32) {
+                        HStack(spacing: 40) {
                             // Add Media Button
                             Button(action: {
                                 HapticManager.medium()
                                 viewModel.showSourceTypeSheet = true
                             }) {
-                                Label("Add Media", systemImage: "photo.fill")
-                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                VStack(spacing: 4) {
+                                    Image(systemName: "photo.fill")
+                                        .font(.system(size: 20, weight: .medium))
+                                    Text("Media")
+                                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                                }
                             }
                             .buttonStyle(ScaleButtonStyle())
                             
@@ -71,11 +73,12 @@ struct MainContent: View {
                                 viewModel.requestLocationPermission()
                                 viewModel.startCapturingLocation()
                             }) {
-                                Label(
-                                    viewModel.currentLocation == nil ? "Add Location" : "Location Added",
-                                    systemImage: viewModel.currentLocation == nil ? "location" : "location.fill"
-                                )
-                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                VStack(spacing: 4) {
+                                    Image(systemName: viewModel.currentLocation == nil ? "location" : "location.fill")
+                                        .font(.system(size: 20, weight: .medium))
+                                    Text(viewModel.currentLocation == nil ? "Location" : "Added")
+                                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                                }
                             }
                             .buttonStyle(ScaleButtonStyle())
                         }
@@ -119,17 +122,18 @@ struct MainContent: View {
                     .buttonStyle(PressableButtonStyle())
                     .disabled(viewModel.loveNote.isEmpty)
                 }
-                .padding()
+                .padding(20) // Increased padding for better spacing
                 .background(
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 20) // Slightly more rounded corners
                         .fill(Color.background)
-                        .shadow(color: .black.opacity(0.05), radius: 10)
+                        .shadow(color: .black.opacity(0.05), radius: 12, x: 0, y: 4)
                 )
-                .padding(.horizontal)
+                .padding(.horizontal, 16)
             }
             .padding(.bottom, 20)
         }
         .background(Color.puchiBackground)
+        .contentShape(Rectangle())
         .onTapGesture {
             isTextFieldFocused = false
         }
@@ -139,6 +143,10 @@ struct MainContent: View {
                     isTextFieldFocused = false
                 }
         )
+        .onAppear {
+            // Ensure keyboard dismisses when view appears
+            isTextFieldFocused = false
+        }
         .sheet(isPresented: $viewModel.showSourceTypeSheet) {
             MediaPicker(
                 sourceType: viewModel.selectedSourceType,

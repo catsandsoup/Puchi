@@ -13,17 +13,22 @@ The Relationship Timeline Enhancement transforms Puchi into a comprehensive rela
 │                    Puchi Enhanced App                        │
 ├─────────────────────────────────────────────────────────────┤
 │  UI Layer (SwiftUI)                                         │
-│  ├── TabView Navigation (4 tabs)                            │
-│  ├── Timeline View                                          │
-│  ├── Milestones View                                        │
-│  ├── Goals View                                             │
-│  └── Enhanced Love Notes View                               │
+│  ├── TabView Navigation (2 tabs)                            │
+│  ├── Enhanced Create Notes View                             │
+│  │   ├── Smart Suggestions Component                       │
+│  │   ├── Milestone Connection Indicators                   │
+│  │   └── Goal Progress Prompts                             │
+│  └── Enhanced Timeline View                                 │
+│      ├── Timeline Spine Component                           │
+│      ├── Integrated Milestone Markers                      │
+│      ├── Goal Progress Overlays                            │
+│      └── Advanced Search & Filter                          │
 ├─────────────────────────────────────────────────────────────┤
 │  Business Logic Layer                                       │
-│  ├── TimelineViewModel                                      │
-│  ├── MilestonesViewModel                                    │
-│  ├── GoalsViewModel                                         │
 │  ├── Enhanced LoveJournalViewModel                          │
+│  ├── TimelineIntegrationManager                            │
+│  ├── MilestoneTrackingService                              │
+│  ├── GoalProgressService                                    │
 │  └── NotificationManager                                    │
 ├─────────────────────────────────────────────────────────────┤
 │  Data Layer                                                 │
@@ -42,19 +47,17 @@ The Relationship Timeline Enhancement transforms Puchi into a comprehensive rela
 
 ### Navigation Structure
 
-The app will transition from a 2-tab to a 4-tab structure:
+The app will maintain its existing 2-tab structure with enhanced functionality:
 
-1. **Timeline** - Chronological view of all relationship content
-2. **Notes** - Enhanced love note creation (existing functionality)
-3. **Milestones** - Milestone tracking and celebration
-4. **Goals** - Relationship goal setting and progress
+1. **Create Notes** - Enhanced love note creation with smart features, milestone connections, and goal prompts
+2. **View Notes** - Timeline-based note viewing with integrated milestones, goals, and advanced organization
 
 ## Components and Interfaces
 
 ### Core Data Models
 
 ```swift
-// Enhanced LoveNote with relationships
+// Enhanced LoveNote with integrated milestone and goal relationships
 struct LoveNote: Identifiable, Codable {
     let id: UUID
     let text: String
@@ -68,9 +71,11 @@ struct LoveNote: Identifiable, Codable {
     var relatedMilestoneId: UUID?
     var relatedGoalId: UUID?
     var isFavorite: Bool
+    var celebratesGoalCompletion: Bool
+    var celebratesMilestone: Bool
 }
 
-// New Milestone model
+// Milestone model (integrated into timeline)
 struct Milestone: Identifiable, Codable {
     let id: UUID
     let title: String
@@ -82,9 +87,10 @@ struct Milestone: Identifiable, Codable {
     var commemorativeNoteId: UUID?
     var notificationSettings: NotificationSettings
     var celebrationStatus: CelebrationStatus
+    var timelinePosition: TimelinePosition // For timeline integration
 }
 
-// New Goal model
+// Goal model (progress tracked through timeline)
 struct Goal: Identifiable, Codable {
     let id: UUID
     let title: String
@@ -96,71 +102,67 @@ struct Goal: Identifiable, Codable {
     var progress: Double // 0.0 to 1.0
     var milestones: [GoalMilestone]
     var relatedNotes: [UUID]
+    var timelineVisibility: TimelineVisibility // How it appears in timeline
 }
 
-// Timeline entry wrapper
+// Unified timeline entry for integrated display
 struct TimelineEntry: Identifiable {
     let id: UUID
     let date: Date
-    let type: TimelineEntryType
-    let content: TimelineContent
+    let type: TimelineEntryType // note, milestone, goal_progress, celebration
+    let primaryContent: LoveNote? // Main note content
+    let milestoneContent: Milestone? // Associated milestone
+    let goalContent: Goal? // Associated goal
     let importance: ImportanceLevel
+    let celebrationType: CelebrationType?
 }
 ```
 
 ### Key View Components
 
-#### 1. Timeline View
-- **Infinite scroll timeline** with lazy loading
-- **Visual timeline spine** with connecting lines
-- **Entry cards** with type-specific styling
-- **Time period headers** (months/years)
-- **Filter and search bar** at top
-- **Zoom controls** for different time scales
+#### 1. Enhanced Create Notes Tab
+- **Larger text input area** with improved keyboard handling
+- **Smart tag suggestions** based on content analysis and recent milestones
+- **Milestone connection indicators** showing relevant upcoming or recent milestones
+- **Goal-related prompts** suggesting note templates based on active goals
+- **Improved media handling** with better preview and organization
+- **Location integration** with proper permission handling
+- **Contextual suggestions** for anniversaries, goal progress, or milestone celebrations
 
-#### 2. Enhanced Notes View
-- **Larger text input area** (addressing current UI issue)
-- **Smart tag suggestions** based on content analysis
-- **Milestone/goal connection indicators**
-- **Template suggestions** based on context
-- **Improved media handling** with better preview
-
-#### 3. Milestones View
-- **Upcoming milestones carousel** at top
-- **Calendar integration** with milestone markers
-- **Category-based organization** (Anniversary, First Times, Achievements, Custom)
-- **Celebration center** for completed milestones
-- **Quick milestone creation** with templates
-
-#### 4. Goals View
-- **Active goals dashboard** with progress rings
-- **Goal categories** (Relationship, Personal Growth, Shared Experiences, Future Plans)
-- **Progress tracking interface** with visual indicators
-- **Achievement celebrations** when goals are completed
-- **Goal templates** for common relationship objectives
+#### 2. Enhanced View Notes Tab (Timeline-Based)
+- **Timeline as primary view** replacing simple list with chronological visualization
+- **Infinite scroll timeline** with lazy loading and smooth performance
+- **Visual timeline spine** with connecting lines between entries
+- **Integrated milestone markers** showing milestones directly on the timeline
+- **Goal progress indicators** embedded within relevant time periods
+- **Time period headers** (months/years) for easy navigation
+- **Advanced search and filtering** with real-time results across all content
+- **Smart grouping** by themes, milestones, or importance levels
+- **Celebration overlays** for milestone achievements and goal completions
 
 ### User Interface Design Patterns
 
 #### Visual Hierarchy
-- **Primary Pink (#FF5A5F)** - Main actions, active states, love-related content
-- **Secondary Pink (#FFB3B5)** - Milestones, celebrations, highlights
-- **Accent Gold (#FFD700)** - Goals, achievements, special moments
-- **Neutral Grays** - Supporting text, backgrounds, inactive states
-- **Success Green (#4CAF50)** - Completed goals, positive progress
-- **Warning Amber (#FFC107)** - Upcoming deadlines, attention needed
+- **Primary Pink (#FF5A5F)** - Main actions, active states, love-related content, timeline spine
+- **Secondary Pink (#FFB3B5)** - Milestone markers, celebrations, timeline highlights
+- **Accent Gold (#FFD700)** - Goal progress indicators, achievements, special moments
+- **Neutral Grays** - Supporting text, backgrounds, inactive states, timeline periods
+- **Success Green (#4CAF50)** - Completed goals, positive progress, achievement celebrations
+- **Warning Amber (#FFC107)** - Upcoming milestones, goal deadlines, gentle reminders
 
 #### Card Design System
-- **Love Note Cards** - Rounded corners, soft shadows, pink accents
-- **Milestone Cards** - Elevated design with celebration elements
-- **Goal Cards** - Progress indicators, achievement badges
-- **Timeline Cards** - Compact design with connection lines
+- **Love Note Cards** - Rounded corners, soft shadows, pink accents with milestone/goal connection indicators
+- **Timeline Entry Cards** - Unified design for notes with embedded milestone and goal information
+- **Milestone Markers** - Compact timeline indicators with celebration elements
+- **Goal Progress Overlays** - Subtle progress indicators integrated into relevant timeline periods
 
 #### Animation Strategy
-- **Celebration animations** for milestone achievements
-- **Progress animations** for goal updates
-- **Timeline scroll animations** with parallax effects
-- **Haptic feedback** synchronized with visual feedback
-- **Micro-interactions** for all user actions
+- **Celebration animations** for milestone achievements integrated into timeline
+- **Progress animations** for goal updates shown as timeline overlays
+- **Timeline scroll animations** with smooth parallax effects and milestone reveals
+- **Tab transition animations** maintaining context between create and view modes
+- **Haptic feedback** synchronized with visual feedback across both tabs
+- **Micro-interactions** for milestone connections and goal progress updates
 
 ## Data Models
 

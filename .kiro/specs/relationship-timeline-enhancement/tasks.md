@@ -23,16 +23,18 @@
     - Write unit tests for new model functionality
     - _Requirements: 1.2, 3.2, 2.1_
 
-- [ ] 3. Implement enhanced navigation structure
-  - [ ] 3.1 Create new tab-based navigation system
-    - Replace existing 2-page TabView with 4-tab TabView structure
-    - Create tab icons and labels for Timeline, Notes, Milestones, Goals
-    - Implement proper tab state management and navigation flow
-    - Add haptic feedback for tab switching
-    - Write UI tests for navigation between tabs
-    - _Requirements: 8.1, 8.2_
+- [ ] 3. Enhance existing 2-tab navigation structure
+  - [ ] 3.1 Enhance Create Notes tab with smart features
+    - Add smart tag suggestions based on content analysis and recent milestones
+    - Implement milestone connection indicators in note creation interface
+    - Create goal-related prompts and template suggestions
+    - Add contextual suggestions for anniversaries and celebrations
+    - Write UI tests for enhanced note creation features
+    - _Requirements: 7.1, 7.2, 7.5, 8.1_
 
   - [x] 3.2 Fix existing UI issues and enhance Notes tab
+
+
 
 
 
@@ -43,96 +45,107 @@
     - Implement proper page indicators for any remaining paginated views
     - _Requirements: 7.3, 8.1_
 
-- [ ] 4. Build Timeline view and functionality
-  - [ ] 4.1 Create Timeline view components
-    - Implement TimelineView with infinite scroll and lazy loading
-    - Create TimelineEntryCard component with type-specific styling
-    - Build timeline spine visual element with connecting lines
-    - Add time period headers (months/years) with proper spacing
-    - Write unit tests for timeline data processing and display logic
+- [ ] 4. Transform View Notes tab into integrated Timeline view
+  - [x] 4.1 Replace notes list with Timeline view components
+
+
+
+    - Replace existing notes list with TimelineView featuring infinite scroll and lazy loading
+    - Create unified TimelineEntryCard component that displays notes with embedded milestone/goal information
+    - Build timeline spine visual element with connecting lines between entries
+    - Add time period headers (months/years) with proper spacing and navigation
+    - Write unit tests for timeline data processing and integrated display logic
     - _Requirements: 2.1, 2.2_
 
-  - [ ] 4.2 Implement timeline filtering and search
-    - Create search bar component with real-time text search across all content types
-    - Implement filter controls for date range, content type, and tags
+  - [ ] 4.2 Integrate milestones and goals into timeline display
+    - Add milestone markers directly on timeline spine at relevant dates
+    - Implement goal progress overlays within relevant timeline periods
+    - Create celebration indicators for milestone achievements and goal completions
+    - Build contextual connections between notes, milestones, and goals in timeline view
+    - Write unit tests for integrated milestone and goal timeline functionality
+    - _Requirements: 1.1, 1.2, 3.1, 3.2_
+
+  - [ ] 4.3 Implement advanced timeline filtering and search
+    - Create search bar component with real-time text search across notes, milestones, and goals
+    - Implement filter controls for date range, content type, tags, milestones, and goals
     - Add zoom controls for different timeline scales (day/month/year view)
-    - Create smart grouping logic for large datasets
-    - Write unit tests for search and filtering functionality
+    - Create smart grouping logic for large datasets with milestone and goal context
+    - Write unit tests for integrated search and filtering functionality
     - _Requirements: 4.1, 4.2, 2.3_
 
-- [ ] 5. Create Milestones management system
-  - [ ] 5.1 Build Milestones view interface
-    - Create MilestonesView with upcoming milestones carousel
-    - Implement milestone category organization and filtering
-    - Build milestone creation form with templates and custom options
-    - Create celebration center for completed milestones
+- [ ] 5. Implement integrated Milestones system
+  - [ ] 5.1 Build milestone creation and management within existing tabs
+    - Create milestone creation interface accessible from Create Notes tab
+    - Implement milestone category organization (Anniversary, FirstTime, Achievement, Custom)
+    - Build milestone templates and custom creation options
+    - Add upcoming milestones indicators in Create Notes tab for context
     - Write UI tests for milestone creation and management flows
     - _Requirements: 1.1, 1.2, 6.1_
 
-  - [ ] 5.2 Implement milestone notifications and celebrations
+  - [ ] 5.2 Implement milestone notifications and timeline celebrations
     - Create NotificationManager for milestone reminders (3 days and 1 day before)
-    - Implement celebration animations and congratulatory messages
+    - Implement celebration animations and congratulatory messages within timeline
     - Build commemorative note creation flow triggered by milestone completion
-    - Add milestone status tracking and visual indicators
+    - Add milestone status tracking and visual indicators on timeline
     - Write unit tests for notification scheduling and celebration logic
     - _Requirements: 1.3, 1.4, 6.1_
 
-- [ ] 6. Develop Goals tracking system
-  - [ ] 6.1 Create Goals view and management
-    - Build GoalsView with active goals dashboard and progress rings
-    - Implement goal creation form with categories and progress tracking options
-    - Create goal progress update interface with visual indicators
-    - Add goal completion celebration sequence
+- [ ] 6. Develop integrated Goals tracking system
+  - [ ] 6.1 Create goal management integrated into existing tabs
+    - Build goal creation interface accessible from Create Notes tab
+    - Implement goal categories (Relationship, PersonalGrowth, SharedExperience, FuturePlans)
+    - Create goal progress update interface with visual indicators in timeline
+    - Add goal completion celebration sequence within timeline view
     - Write unit tests for goal progress calculations and status management
     - _Requirements: 3.1, 3.2, 3.3_
 
-  - [ ] 6.2 Implement goal templates and smart suggestions
+  - [ ] 6.2 Implement goal templates and timeline integration
     - Create predefined goal templates for common relationship objectives
-    - Implement smart goal suggestions based on user behavior and milestones
-    - Build goal-to-note connection system for related content
-    - Add gentle reminder system for overdue goals
-    - Write unit tests for template system and suggestion algorithms
+    - Implement smart goal suggestions in Create Notes tab based on user behavior and milestones
+    - Build goal-to-note connection system showing progress in timeline
+    - Add gentle reminder system for overdue goals with timeline context
+    - Write unit tests for template system and timeline integration algorithms
     - _Requirements: 3.4, 7.5_
 
-- [ ] 7. Enhance existing love notes functionality
-  - [ ] 7.1 Add smart tagging and content analysis
-    - Implement automatic tag suggestions based on note content analysis
+- [ ] 7. Enhance love notes functionality with integrated features
+  - [ ] 7.1 Add smart tagging and contextual connections
+    - Implement automatic tag suggestions based on note content analysis and milestone context
     - Create tag management system with auto-complete and custom tags
-    - Add contextual connections display between notes, milestones, and goals
-    - Build favorites system for quick access to important notes
+    - Add contextual connections display between notes, milestones, and goals in both tabs
+    - Build favorites system for quick access to important notes in timeline
     - Write unit tests for content analysis and tagging algorithms
     - _Requirements: 7.1, 7.2, 4.3_
 
-  - [ ] 7.2 Improve note creation experience
+  - [ ] 7.2 Improve note creation with milestone and goal integration
     - Add note templates and prompts related to current goals or upcoming milestones
     - Implement improved media handling with better preview and organization
-    - Create streak celebration system tied to relationship milestones
-    - Add personalized encouragement system for missed note days
-    - Write UI tests for enhanced note creation flow
+    - Create streak celebration system tied to relationship milestones shown in timeline
+    - Add personalized encouragement system for missed note days with milestone context
+    - Write UI tests for enhanced note creation flow with integrated features
     - _Requirements: 7.4, 7.5, 7.3_
 
-- [ ] 8. Implement search and organization features
-  - Create unified search service that works across notes, milestones, and goals
-  - Implement advanced filtering with multiple criteria and saved filter sets
-  - Build smart grouping algorithms for timeline and content organization
-  - Add favorites and bookmarking system for quick content access
-  - Write unit tests for search algorithms and performance optimization
+- [ ] 8. Implement integrated search and organization features
+  - Create unified search service that works across notes, milestones, and goals within timeline view
+  - Implement advanced filtering with multiple criteria and saved filter sets for timeline
+  - Build smart grouping algorithms for timeline organization with milestone and goal context
+  - Add favorites and bookmarking system accessible from both Create and View tabs
+  - Write unit tests for integrated search algorithms and performance optimization
   - _Requirements: 4.1, 4.2, 4.4, 4.5_
 
-- [ ] 9. Build sharing and export functionality
-  - [ ] 9.1 Create sharing system with privacy controls
-    - Implement beautiful share card generation with branded design
-    - Build privacy control system for selective content sharing
+- [ ] 9. Build integrated sharing and export functionality
+  - [ ] 9.1 Create sharing system with timeline integration
+    - Implement beautiful share card generation with branded design including milestone and goal context
+    - Build privacy control system for selective content sharing from timeline
     - Create external sharing integration with respect for privacy settings
-    - Add memory lane compilation generator for anniversaries
+    - Add memory lane compilation generator for anniversaries with integrated milestone timeline
     - Write unit tests for share card generation and privacy controls
     - _Requirements: 6.2, 6.3, 6.5_
 
-  - [ ] 9.2 Implement data export and backup features
-    - Create multiple export format options (PDF timeline, JSON backup, photo album)
-    - Build local backup system with automatic and manual backup options
-    - Implement data import functionality for backup restoration
-    - Add export progress tracking and error handling
+  - [ ] 9.2 Implement comprehensive data export and backup features
+    - Create multiple export format options (PDF timeline with milestones/goals, JSON backup, photo album)
+    - Build local backup system with automatic and manual backup options for all data types
+    - Implement data import functionality for backup restoration including milestones and goals
+    - Add export progress tracking and error handling for integrated data
     - Write integration tests for export/import functionality
     - _Requirements: 5.3, 5.4_
 
@@ -178,12 +191,12 @@
     - Write performance tests for large dataset scenarios
     - _Requirements: 2.4_
 
-- [ ] 13. Create celebration and animation system
-  - Build celebration animation library for milestones and goal achievements
-  - Implement customizable celebration messages and visual effects
-  - Create smooth timeline scroll animations with parallax effects
-  - Add synchronized haptic feedback for all user interactions
-  - Write animation tests for performance and smoothness
+- [ ] 13. Create integrated celebration and animation system
+  - Build celebration animation library for milestones and goal achievements within timeline
+  - Implement customizable celebration messages and visual effects for both tabs
+  - Create smooth timeline scroll animations with parallax effects and milestone reveals
+  - Add synchronized haptic feedback for all user interactions across both tabs
+  - Write animation tests for performance and smoothness in integrated environment
   - _Requirements: 6.1, 8.2_
 
 - [ ] 14. Add final polish and bug fixes

@@ -373,6 +373,8 @@ struct WelcomeView: View {
             // Clear any existing partner image data if this is first time user
             UserDefaults.standard.removeObject(forKey: "partnerImageData")
             partnerImage = nil
+            selectedPhoto = nil
+            tempUIImage = nil
             return
         }
         

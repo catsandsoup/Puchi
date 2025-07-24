@@ -25,8 +25,8 @@ struct MainAppView: View {
                     .tag(0)
                     .transition(.opacity)
                     
-                    // Notes History Page
-                    NotesList(notes: viewModel.savedNotes, viewModel: viewModel)
+                    // Timeline Page
+                    TimelineView(notes: viewModel.savedNotes, viewModel: viewModel)
                         .tag(1)
                         .transition(.opacity)
                 }
@@ -36,7 +36,10 @@ struct MainAppView: View {
                     HapticManager.light()
                     // Dismiss keyboard when changing pages
                     isTextFieldFocused = false
+                    // Also dismiss any system keyboard
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
+                .contentShape(Rectangle())
                 .onTapGesture {
                     isTextFieldFocused = false
                 }
