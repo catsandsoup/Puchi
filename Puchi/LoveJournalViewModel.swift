@@ -16,12 +16,17 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     @Published var showMediaPicker = false
     @Published var selectedSourceType: UIImagePickerController.SourceType = .photoLibrary
     
+    // MARK: - Error Handling
+    @Published var errorHandler = ErrorHandler()
+    @Published var isProcessing = false
+    
     // MARK: - User Defaults
     @AppStorage("partnerName") var storedPartnerName = ""
     @AppStorage("isFirstTimeUser") var isFirstTimeUser = true
     
     // MARK: - Private Properties
     private let locationManager = CLLocationManager()
+    private var locationTimeout: Timer?
     
     private var lastNoteDate: Date? {
         didSet {
@@ -60,13 +65,21 @@ class LoveJournalViewModel: NSObject, ObservableObject {
         case .notDetermined:
             requestLocationPermission()
         case .denied, .restricted:
-            print("Location access denied")
+            errorHandler.handle(PuchiError.locationAccessDenied)
             return
         case .authorizedWhenInUse, .authorizedAlways:
             isCapturingLocation = true
             locationManager.startUpdatingLocation()
+            
+            // Set timeout for location capture
+            locationTimeout = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: false) { [weak self] _ in
+                Task { @MainActor in
+                    self?.stopCapturingLocation()
+                    self?.errorHandler.handle(PuchiError.unknownError("Location request timed out"))
+                }
+            }
         @unknown default:
-            print("Unknown location authorization status")
+            errorHandler.handle(PuchiError.unknownError("Unknown location authorization status"))
             return
         }
     }
@@ -74,6 +87,8 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     func stopCapturingLocation() {
         isCapturingLocation = false
         locationManager.stopUpdatingLocation()
+        locationTimeout?.invalidate()
+        locationTimeout = nil
     }
     
     func removeLocation() {
@@ -83,7 +98,30 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     
     // MARK: - Note Management
     func saveLoveNote() {
-        guard !loveNote.isEmpty else { return }
+        isProcessing = true
+        
+        // Validate input
+        let validationResult = DataValidator.validateNote(loveNote, partnerName: storedPartnerName)
+        switch validationResult {
+        case .failure(let error):
+            errorHandler.handle(error)
+            isProcessing = false
+            return
+        case .success:
+            break
+        }
+        
+        // Validate media size
+        let allMedia = mediaManager.getImages() + mediaManager.getVideos()
+        let mediaSizeResult = DataValidator.validateMediaSize(allMedia)
+        switch mediaSizeResult {
+        case .failure(let error):
+            errorHandler.handle(error)
+            isProcessing = false
+            return
+        case .success:
+            break
+        }
         
         // Use MediaManager's media items directly
         let imageItems = mediaManager.getImages()
@@ -114,6 +152,7 @@ class LoveJournalViewModel: NSObject, ObservableObject {
         currentLocation = .none
         
         saveNotes()
+        isProcessing = false
     }
     
     func deleteNote(at indexSet: IndexSet) {
@@ -164,15 +203,27 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     }
     
     private func saveNotes() {
-        if let encoded = try? JSONEncoder().encode(savedNotes) {
-            UserDefaults.standard.set(encoded, forKey: "savedNotes")
+        let result = UserDefaults.standard.safeSet(savedNotes, forKey: "savedNotes")
+        switch result {
+        case .failure(let error):
+            errorHandler.handle(error)
+        case .success:
+            break
         }
     }
     
     private func loadNotes() {
-        if let savedData = UserDefaults.standard.data(forKey: "savedNotes"),
-           let decodedNotes = try? JSONDecoder().decode([LoveNote].self, from: savedData) {
-            savedNotes = decodedNotes.sorted(by: { $0.date > $1.date })
+        let result = UserDefaults.standard.safeGet([LoveNote].self, forKey: "savedNotes")
+        switch result {
+        case .success(let notes):
+            if let notes = notes {
+                savedNotes = notes.sorted(by: { $0.date > $1.date })
+            }
+        case .failure(let error):
+            errorHandler.handle(error)
+            // Try to recover by clearing corrupted data
+            UserDefaults.standard.removeObject(forKey: "savedNotes")
+            savedNotes = []
         }
     }
 }
@@ -204,8 +255,8 @@ extension LoveJournalViewModel: CLLocationManagerDelegate {
     
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         Task { @MainActor in
-            print("Location error: \(error.localizedDescription)")
-            self.isCapturingLocation = false
+            self.stopCapturingLocation()
+            self.errorHandler.handle(error)
         }
     }
     

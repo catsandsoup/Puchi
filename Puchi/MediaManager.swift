@@ -14,19 +14,41 @@ class MediaManager: ObservableObject {
         selectedMedia.append(contentsOf: items)
     }
     
-    func addImage(_ image: UIImage, filename: String = "") {
-        guard let data = image.optimizedForStorage() else { return }
+    func addImage(_ image: UIImage, filename: String = "") -> Result<Void, PuchiError> {
+        guard let data = image.optimizedForStorage() else {
+            return .failure(.mediaProcessingFailed)
+        }
+        
+        let validationResult = DataValidator.validateMediaData(data, type: .image)
+        switch validationResult {
+        case .failure(let error):
+            return .failure(error)
+        case .success:
+            break
+        }
+        
         let mediaItem = MediaItem(data: data, type: .image, filename: filename)
         selectedMedia.append(mediaItem)
+        return .success(())
     }
     
-    func addVideo(from url: URL, filename: String = "") {
+    func addVideo(from url: URL, filename: String = "") -> Result<Void, PuchiError> {
         do {
             let data = try Data(contentsOf: url)
+            
+            let validationResult = DataValidator.validateMediaData(data, type: .video)
+            switch validationResult {
+            case .failure(let error):
+                return .failure(error)
+            case .success:
+                break
+            }
+            
             let mediaItem = MediaItem(data: data, type: .video, filename: filename)
             selectedMedia.append(mediaItem)
+            return .success(())
         } catch {
-            print("Failed to add video: \(error.localizedDescription)")
+            return .failure(.mediaProcessingFailed)
         }
     }
     
