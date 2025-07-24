@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This feature enhances the visual design and user interface of Puchi to follow Apple Human Interface Guidelines and iOS best practices. The enhancement focuses on creating a more appealing, logical, and intuitive interface inspired by successful iOS apps like Tinder's media picker system and the Journal app's text and image management, while maintaining the romantic aesthetic that defines Puchi.
+This feature enhances the visual appeal and logical structure of the Puchi app by implementing Apple Human Interface Guidelines and iOS best practices. The enhancement draws inspiration from Tinder's media picker system and the Journal app's text and image management to create a more polished, intuitive, and visually engaging user experience while maintaining the romantic aesthetic.
 
 ## Requirements
 
@@ -13,10 +13,10 @@ This feature enhances the visual design and user interface of Puchi to follow Ap
 #### Acceptance Criteria
 
 1. WHEN I see the empty text area THEN the system SHALL display subtle background textures or patterns that enhance the romantic feel
-2. WHEN the text field is empty THEN the system SHALL show engaging placeholder text with examples of great love notes
-3. WHEN I focus on the text area THEN the system SHALL provide visual hints about writing meaningful content through subtle UI cues
-4. IF the text area is empty THEN the system SHALL use warm, inviting colors and typography that encourage writing
-5. WHEN I start typing THEN the system SHALL smoothly transition the visual state to focus on the content
+2. WHEN the text area is empty THEN the system SHALL show engaging placeholder text with examples of great love notes
+3. WHEN I interact with the text area THEN the system SHALL provide visual hints about writing meaningful content
+4. IF I start typing THEN the system SHALL smoothly transition the placeholder and background elements
+5. WHEN the text area gains focus THEN the system SHALL use subtle animations that follow iOS design principles
 
 ### Requirement 2
 
@@ -24,11 +24,11 @@ This feature enhances the visual design and user interface of Puchi to follow Ap
 
 #### Acceptance Criteria
 
-1. WHEN I view the main interface THEN the system SHALL use proper shadows and elevation following iOS design principles
-2. WHEN I see different sections THEN the system SHALL provide distinct visual separation using cards, spacing, and depth
+1. WHEN I view the main interface THEN the system SHALL use proper shadows and depth following iOS elevation principles
+2. WHEN I see different sections THEN the system SHALL provide distinct visual separation using cards, spacing, and typography
 3. WHEN I read text content THEN the system SHALL use enhanced typography with appropriate font weights, sizes, and line spacing
-4. IF elements are interactive THEN the system SHALL provide clear visual affordances using proper button styling and states
-5. WHEN I navigate the interface THEN the system SHALL maintain consistent visual hierarchy throughout all screens
+4. IF elements are interactive THEN the system SHALL provide clear visual affordances using iOS standard patterns
+5. WHEN I navigate between sections THEN the system SHALL maintain consistent visual hierarchy throughout
 
 ### Requirement 3
 
@@ -36,23 +36,23 @@ This feature enhances the visual design and user interface of Puchi to follow Ap
 
 #### Acceptance Criteria
 
-1. WHEN I use the app THEN the system SHALL display a refined color palette with complementary colors beyond just pink
-2. WHEN I see backgrounds and cards THEN the system SHALL use subtle gradients that create emotional warmth and depth
+1. WHEN I use the app THEN the system SHALL display a refined color palette with complementary colors beyond basic pink
+2. WHEN I see backgrounds and cards THEN the system SHALL use subtle gradients that create emotional warmth
 3. WHEN different seasons or times occur THEN the system SHALL optionally adapt color variations while maintaining brand consistency
-4. IF I interact with elements THEN the system SHALL use color psychology principles for different states (active, disabled, success)
-5. WHEN viewing the interface THEN the system SHALL ensure all colors meet WCAG accessibility standards for contrast
+4. IF I have accessibility needs THEN the system SHALL ensure all colors meet WCAG contrast requirements
+5. WHEN I interact with elements THEN the system SHALL use color psychology principles for feedback and states
 
 ### Requirement 4
 
-**User Story:** As a user, I want media selection and management that feels as smooth and intuitive as Tinder's system so that adding photos and videos is effortless.
+**User Story:** As a user, I want media selection and management that feels as polished as Tinder's system so that adding photos and videos is intuitive and enjoyable.
 
 #### Acceptance Criteria
 
-1. WHEN I tap to add media THEN the system SHALL present a Tinder-inspired media picker with smooth animations and transitions
-2. WHEN I select multiple media items THEN the system SHALL provide immediate visual feedback with thumbnail previews
-3. WHEN I manage selected media THEN the system SHALL allow easy reordering, removal, and preview similar to modern iOS apps
-4. IF I have mixed media types THEN the system SHALL clearly distinguish between photos and videos with appropriate icons
-5. WHEN media is processing THEN the system SHALL show elegant loading states and progress indicators
+1. WHEN I select media THEN the system SHALL provide a Tinder-inspired picker with smooth animations and transitions
+2. WHEN I preview selected media THEN the system SHALL display items in an elegant grid with proper aspect ratios
+3. WHEN I manage multiple media items THEN the system SHALL provide intuitive reordering and removal interactions
+4. IF I select videos THEN the system SHALL show proper video thumbnails with play indicators
+5. WHEN media operations complete THEN the system SHALL provide satisfying feedback animations
 
 ### Requirement 5
 
@@ -60,44 +60,32 @@ This feature enhances the visual design and user interface of Puchi to follow Ap
 
 #### Acceptance Criteria
 
-1. WHEN I write text THEN the system SHALL provide Journal app-inspired text editing with proper formatting and spacing
-2. WHEN I add images to text THEN the system SHALL seamlessly integrate media within the text flow like the Journal app
-3. WHEN I edit content THEN the system SHALL provide intuitive text selection, cursor positioning, and editing controls
-4. IF I have long content THEN the system SHALL handle scrolling and text wrapping elegantly
-5. WHEN I save content THEN the system SHALL preserve the rich text and media layout properly
+1. WHEN I combine text and media THEN the system SHALL provide seamless integration similar to Journal app's approach
+2. WHEN I edit content THEN the system SHALL allow inline media placement and text wrapping
+3. WHEN I view my content THEN the system SHALL display text and media in a cohesive, readable layout
+4. IF I have long content THEN the system SHALL provide smooth scrolling with proper content flow
+5. WHEN I save content THEN the system SHALL preserve the integrated layout and formatting
 
 ### Requirement 6
 
-**User Story:** As a user, I want the interface to follow Apple Human Interface Guidelines so that the app feels native and familiar.
+**User Story:** As a user, I want all interactions to follow iOS best practices so that the app feels native and familiar.
 
 #### Acceptance Criteria
 
-1. WHEN I use gestures THEN the system SHALL respond according to iOS gesture conventions and expectations
-2. WHEN I see buttons and controls THEN the system SHALL use standard iOS button styles, sizing, and spacing
-3. WHEN I navigate THEN the system SHALL follow iOS navigation patterns with proper back buttons and transitions
-4. IF I use accessibility features THEN the system SHALL fully support VoiceOver, Dynamic Type, and other iOS accessibility standards
-5. WHEN I interact with the app THEN the system SHALL provide appropriate haptic feedback following iOS guidelines
+1. WHEN I interact with any element THEN the system SHALL provide appropriate haptic feedback following iOS patterns
+2. WHEN I see animations THEN the system SHALL use iOS standard timing curves and durations
+3. WHEN I navigate THEN the system SHALL follow iOS navigation patterns and conventions
+4. IF I use accessibility features THEN the system SHALL provide full iOS accessibility support
+5. WHEN I see loading states THEN the system SHALL use iOS standard progress indicators and patterns
 
 ### Requirement 7
 
-**User Story:** As a user, I want smooth animations and micro-interactions so that the app feels polished and delightful to use.
+**User Story:** As a user, I want the overall visual design to feel premium and polished so that the app reflects the importance of my relationship memories.
 
 #### Acceptance Criteria
 
-1. WHEN I interact with elements THEN the system SHALL provide smooth, purposeful animations that enhance usability
-2. WHEN states change THEN the system SHALL use appropriate iOS animation curves and timing
-3. WHEN I perform actions THEN the system SHALL give immediate visual feedback through micro-interactions
-4. IF animations are playing THEN the system SHALL respect user preferences for reduced motion
-5. WHEN transitions occur THEN the system SHALL maintain 60fps performance and smooth visual continuity
-
-### Requirement 8
-
-**User Story:** As a user, I want consistent and logical spacing, sizing, and layout so that the interface feels cohesive and professional.
-
-#### Acceptance Criteria
-
-1. WHEN I view different screens THEN the system SHALL use consistent spacing units based on iOS design tokens
-2. WHEN I see text and elements THEN the system SHALL follow proper sizing hierarchies and proportions
-3. WHEN I use the app on different devices THEN the system SHALL adapt layouts appropriately for screen sizes
-4. IF content varies in length THEN the system SHALL handle dynamic sizing gracefully
-5. WHEN I rotate the device THEN the system SHALL maintain proper layout and proportions
+1. WHEN I use the app THEN the system SHALL display consistent visual polish throughout all screens
+2. WHEN I see any UI element THEN the system SHALL follow a cohesive design system with proper spacing and alignment
+3. WHEN I interact with the interface THEN the system SHALL provide smooth, delightful micro-interactions
+4. IF I compare to other premium apps THEN the system SHALL meet or exceed visual quality standards
+5. WHEN I show the app to others THEN the system SHALL create a positive first impression through visual appeal

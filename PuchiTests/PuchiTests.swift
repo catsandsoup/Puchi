@@ -320,5 +320,261 @@ struct PuchiTests {
         }
         #expect(currentMonthGroup?.1.count == 2, "Current month should have 2 notes")
     }
+    
+    // MARK: - Location Management Tests
+    
+    @Test func testLocationRemoval() async throws {
+        let viewModel = LoveJournalViewModel()
+        
+        // Set up a location
+        let testLocation = LocationData(
+            latitude: 37.7749,
+            longitude: -122.4194,
+            placeName: "San Francisco, CA"
+        )
+        viewModel.currentLocation = testLocation
+        
+        // Verify location is set
+        #expect(viewModel.currentLocation != nil)
+        #expect(viewModel.currentLocation?.placeName == "San Francisco, CA")
+        
+        // Remove location
+        viewModel.removeLocation()
+        
+        // Verify location is removed
+        #expect(viewModel.currentLocation == nil)
+        #expect(!viewModel.isCapturingLocation)
+    }
+    
+    @Test func testLocationRemovalWhenNoLocation() async throws {
+        let viewModel = LoveJournalViewModel()
+        
+        // Ensure no location is set initially
+        #expect(viewModel.currentLocation == nil)
+        
+        // Try to remove location when none exists (should not crash)
+        viewModel.removeLocation()
+        
+        // Verify still no location
+        #expect(viewModel.currentLocation == nil)
+        #expect(!viewModel.isCapturingLocation)
+    }
+    
+    @Test func testSaveNoteWithoutLocationAfterRemoval() async throws {
+        let viewModel = LoveJournalViewModel()
+        viewModel.storedPartnerName = "Test Partner"
+        
+        // Set up a location
+        let testLocation = LocationData(
+            latitude: 37.7749,
+            longitude: -122.4194,
+            placeName: "San Francisco, CA"
+        )
+        viewModel.currentLocation = testLocation
+        
+        // Set note text
+        viewModel.loveNote = "Test note with location"
+        
+        // Remove location before saving
+        viewModel.removeLocation()
+        
+        // Save the note
+        viewModel.saveLoveNote()
+        
+        // Verify the saved note has no location
+        #expect(!viewModel.savedNotes.isEmpty)
+        let savedNote = viewModel.savedNotes.first!
+        #expect(savedNote.location == nil)
+        #expect(savedNote.text == "Test note with location")
+    }
+    
+    // MARK: - MediaManager Tests
+    
+    @Test func testMediaManagerInitialization() async throws {
+        let mediaManager = MediaManager()
+        
+        #expect(mediaManager.selectedMedia.isEmpty)
+        #expect(!mediaManager.hasMedia)
+        #expect(mediaManager.mediaCount == 0)
+        #expect(mediaManager.imageCount == 0)
+        #expect(mediaManager.videoCount == 0)
+        #expect(!mediaManager.isProcessing)
+        #expect(!mediaManager.isShowingPicker)
+    }
+    
+    @Test func testMediaManagerAddMedia() async throws {
+        let mediaManager = MediaManager()
+        
+        // Create test media items
+        let imageData = Data([1, 2, 3, 4]) // Mock image data
+        let videoData = Data([5, 6, 7, 8]) // Mock video data
+        
+        let imageItem = MediaItem(data: imageData, type: .image, filename: "test_image.jpg")
+        let videoItem = MediaItem(data: videoData, type: .video, filename: "test_video.mp4")
+        
+        // Add media items
+        mediaManager.addMedia([imageItem, videoItem])
+        
+        #expect(mediaManager.mediaCount == 2)
+        #expect(mediaManager.imageCount == 1)
+        #expect(mediaManager.videoCount == 1)
+        #expect(mediaManager.hasMedia)
+        
+        // Verify specific items
+        let images = mediaManager.getImages()
+        let videos = mediaManager.getVideos()
+        
+        #expect(images.count == 1)
+        #expect(videos.count == 1)
+        #expect(images.first?.filename == "test_image.jpg")
+        #expect(videos.first?.filename == "test_video.mp4")
+    }
+    
+    @Test func testMediaManagerRemoveMedia() async throws {
+        let mediaManager = MediaManager()
+        
+        // Add test media
+        let imageData = Data([1, 2, 3, 4])
+        let imageItem = MediaItem(data: imageData, type: .image, filename: "test.jpg")
+        mediaManager.addMedia([imageItem])
+        
+        #expect(mediaManager.mediaCount == 1)
+        
+        // Remove by index
+        mediaManager.removeMedia(at: 0)
+        #expect(mediaManager.mediaCount == 0)
+        #expect(!mediaManager.hasMedia)
+        
+        // Add again and remove by ID
+        mediaManager.addMedia([imageItem])
+        #expect(mediaManager.mediaCount == 1)
+        
+        mediaManager.removeMedia(withId: imageItem.id)
+        #expect(mediaManager.mediaCount == 0)
+    }
+    
+    @Test func testMediaManagerClearAllMedia() async throws {
+        let mediaManager = MediaManager()
+        
+        // Add multiple media items
+        let items = [
+            MediaItem(data: Data([1, 2, 3]), type: .image),
+            MediaItem(data: Data([4, 5, 6]), type: .video),
+            MediaItem(data: Data([7, 8, 9]), type: .image)
+        ]
+        
+        mediaManager.addMedia(items)
+        #expect(mediaManager.mediaCount == 3)
+        
+        // Clear all media
+        mediaManager.clearAllMedia()
+        #expect(mediaManager.mediaCount == 0)
+        #expect(!mediaManager.hasMedia)
+        #expect(mediaManager.selectedMedia.isEmpty)
+    }
+    
+    @Test func testMediaManagerValidation() async throws {
+        let mediaManager = MediaManager()
+        
+        // Test with small media (should pass validation)
+        let smallData = Data(repeating: 0, count: 1024) // 1KB
+        let smallItem = MediaItem(data: smallData, type: .image)
+        mediaManager.addMedia([smallItem])
+        
+        #expect(mediaManager.validateMediaSize())
+        #expect(mediaManager.getMediaSizeInMB() < 1.0)
+        
+        // Test media size calculation
+        let sizeInMB = mediaManager.getMediaSizeInMB()
+        #expect(sizeInMB > 0)
+    }
+    
+    @Test func testMediaManagerFilterByType() async throws {
+        let mediaManager = MediaManager()
+        
+        // Add mixed media types
+        let items = [
+            MediaItem(data: Data([1]), type: .image, filename: "image1.jpg"),
+            MediaItem(data: Data([2]), type: .video, filename: "video1.mp4"),
+            MediaItem(data: Data([3]), type: .image, filename: "image2.jpg"),
+            MediaItem(data: Data([4]), type: .video, filename: "video2.mp4"),
+            MediaItem(data: Data([5]), type: .image, filename: "image3.jpg")
+        ]
+        
+        mediaManager.addMedia(items)
+        
+        #expect(mediaManager.mediaCount == 5)
+        #expect(mediaManager.imageCount == 3)
+        #expect(mediaManager.videoCount == 2)
+        
+        let images = mediaManager.getImages()
+        let videos = mediaManager.getVideos()
+        
+        #expect(images.count == 3)
+        #expect(videos.count == 2)
+        
+        // Verify all images are actually images
+        for image in images {
+            #expect(image.type == .image)
+        }
+        
+        // Verify all videos are actually videos
+        for video in videos {
+            #expect(video.type == .video)
+        }
+    }
+    
+    // MARK: - Enhanced MediaItem Tests
+    
+    @Test func testEnhancedMediaItemInitialization() async throws {
+        let data = Data([1, 2, 3, 4])
+        
+        // Test with custom filename
+        let customItem = MediaItem(data: data, type: .image, filename: "custom_image.jpg")
+        #expect(customItem.filename == "custom_image.jpg")
+        #expect(customItem.type == .image)
+        #expect(customItem.data == data)
+        #expect(customItem.createdDate <= Date())
+        
+        // Test with auto-generated filename
+        let autoItem = MediaItem(data: data, type: .video)
+        #expect(autoItem.filename.hasPrefix("video_"))
+        #expect(autoItem.type == .video)
+    }
+    
+    @Test func testMediaItemBackwardCompatibility() async throws {
+        // Test that old MediaItem format can still be decoded
+        let oldFormatJSON = """
+        {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "data": "AQIDBA==",
+            "type": "image"
+        }
+        """
+        
+        let jsonData = oldFormatJSON.data(using: .utf8)!
+        let decodedItem = try JSONDecoder().decode(MediaItem.self, from: jsonData)
+        
+        #expect(decodedItem.type == .image)
+        #expect(decodedItem.data == Data([1, 2, 3, 4]))
+        #expect(decodedItem.filename.hasPrefix("image_"))
+        #expect(decodedItem.createdDate <= Date())
+    }
+    
+    @Test func testMediaTypeEnhancements() async throws {
+        // Test system images
+        #expect(MediaType.image.systemImage == "photo.fill")
+        #expect(MediaType.video.systemImage == "video.fill")
+        
+        // Test file extensions
+        #expect(MediaType.image.fileExtension == "jpg")
+        #expect(MediaType.video.fileExtension == "mp4")
+        
+        // Test all cases
+        let allCases = MediaType.allCases
+        #expect(allCases.count == 2)
+        #expect(allCases.contains(.image))
+        #expect(allCases.contains(.video))
+    }
 
 }

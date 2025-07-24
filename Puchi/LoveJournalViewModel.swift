@@ -10,6 +10,9 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     @Published var savedNotes: [LoveNote] = []
     @Published var selectedImages: [UIImage] = []
     @Published var selectedVideos: [URL] = []
+    
+    // MARK: - Media Manager
+    @Published var mediaManager = MediaManager()
     @Published var currentLocation: LocationData?
     @Published var isCapturingLocation = false
     @Published var showSourceTypeSheet = false
@@ -46,18 +49,73 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     // MARK: - Media Management
     func addImage(_ image: UIImage) {
         selectedImages.append(image)
+        mediaManager.addImage(image)
     }
     
     func removeImage(at index: Int) {
         selectedImages.remove(at: index)
+        // Also remove from media manager if indices match
+        if index < mediaManager.getImages().count {
+            let imageItems = mediaManager.getImages()
+            mediaManager.removeMedia(withId: imageItems[index].id)
+        }
     }
     
     func addVideo(_ url: URL) {
         selectedVideos.append(url)
+        mediaManager.addVideo(from: url)
     }
     
     func removeVideo(at index: Int) {
         selectedVideos.remove(at: index)
+        // Also remove from media manager if indices match
+        if index < mediaManager.getVideos().count {
+            let videoItems = mediaManager.getVideos()
+            mediaManager.removeMedia(withId: videoItems[index].id)
+        }
+    }
+    
+    // MARK: - Enhanced Media Management
+    func addMediaItems(_ items: [MediaItem]) {
+        mediaManager.addMedia(items)
+        
+        // Update legacy arrays for backward compatibility
+        for item in items {
+            switch item.type {
+            case .image:
+                if let image = UIImage(data: item.data) {
+                    selectedImages.append(image)
+                }
+            case .video:
+                // Create temporary URL for video data
+                let tempURL = FileManager.default.temporaryDirectory
+                    .appendingPathComponent(item.filename)
+                do {
+                    try item.data.write(to: tempURL)
+                    selectedVideos.append(tempURL)
+                } catch {
+                    print("Failed to create temporary video file: \(error)")
+                }
+            }
+        }
+    }
+    
+    func removeMediaItem(at index: Int) {
+        mediaManager.removeMedia(at: index)
+        
+        // Update legacy arrays - this is a simplified approach
+        // In a full implementation, you'd want to track the mapping more precisely
+        if index < selectedImages.count {
+            selectedImages.remove(at: index)
+        } else if index - selectedImages.count < selectedVideos.count {
+            selectedVideos.remove(at: index - selectedImages.count)
+        }
+    }
+    
+    func clearAllMedia() {
+        selectedImages.removeAll()
+        selectedVideos.removeAll()
+        mediaManager.clearAllMedia()
     }
     
     // MARK: - Location Management
@@ -86,6 +144,11 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     func stopCapturingLocation() {
         isCapturingLocation = false
         locationManager.stopUpdatingLocation()
+    }
+    
+    func removeLocation() {
+        currentLocation = nil
+        stopCapturingLocation()
     }
     
     // MARK: - Note Management
@@ -131,8 +194,7 @@ class LoveJournalViewModel: NSObject, ObservableObject {
         
         // Clear the form
         loveNote = ""
-        selectedImages.removeAll()
-        selectedVideos.removeAll()
+        clearAllMedia()
         currentLocation = .none
         
         saveNotes()

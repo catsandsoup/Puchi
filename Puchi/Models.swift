@@ -177,15 +177,60 @@ struct MediaItem: Codable, Identifiable {
     let id: UUID
     let data: Data
     let type: MediaType
+    let filename: String
+    let createdDate: Date
     
-    init(data: Data, type: MediaType) {
+    init(data: Data, type: MediaType, filename: String = "") {
         self.id = UUID()
         self.data = data
         self.type = type
+        self.filename = filename.isEmpty ? "\(type.rawValue)_\(UUID().uuidString)" : filename
+        self.createdDate = Date()
+    }
+    
+    // MARK: - Custom Codable Implementation for Backward Compatibility
+    enum CodingKeys: String, CodingKey {
+        case id, data, type, filename, createdDate
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        id = try container.decode(UUID.self, forKey: .id)
+        data = try container.decode(Data.self, forKey: .data)
+        type = try container.decode(MediaType.self, forKey: .type)
+        
+        // New properties with default values for backward compatibility
+        filename = try container.decodeIfPresent(String.self, forKey: .filename) ?? "\(type.rawValue)_\(UUID().uuidString)"
+        createdDate = try container.decodeIfPresent(Date.self, forKey: .createdDate) ?? Date()
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(data, forKey: .data)
+        try container.encode(type, forKey: .type)
+        try container.encode(filename, forKey: .filename)
+        try container.encode(createdDate, forKey: .createdDate)
     }
 }
 
-enum MediaType: String, Codable {
-    case image
-    case video
+enum MediaType: String, Codable, CaseIterable {
+    case image = "image"
+    case video = "video"
+    
+    var systemImage: String {
+        switch self {
+        case .image: return "photo.fill"
+        case .video: return "video.fill"
+        }
+    }
+    
+    var fileExtension: String {
+        switch self {
+        case .image: return "jpg"
+        case .video: return "mp4"
+        }
+    }
 }

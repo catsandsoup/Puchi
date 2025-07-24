@@ -66,26 +66,31 @@ struct MainContent: View {
                                 }
                             }
                             .buttonStyle(ScaleButtonStyle())
+                            .foregroundColor(.puchiPrimary)
                             
                             // Add Location Button
                             Button(action: {
                                 HapticManager.medium()
-                                viewModel.requestLocationPermission()
-                                viewModel.startCapturingLocation()
+                                if viewModel.currentLocation == nil {
+                                    viewModel.requestLocationPermission()
+                                    viewModel.startCapturingLocation()
+                                } else {
+                                    viewModel.removeLocation()
+                                }
                             }) {
                                 VStack(spacing: 4) {
                                     Image(systemName: viewModel.currentLocation == nil ? "location" : "location.fill")
                                         .font(.system(size: 20, weight: .medium))
-                                    Text(viewModel.currentLocation == nil ? "Location" : "Added")
+                                    Text(viewModel.currentLocation == nil ? "Location" : "Remove")
                                         .font(.system(size: 12, weight: .medium, design: .rounded))
                                 }
                             }
                             .buttonStyle(ScaleButtonStyle())
+                            .foregroundColor(viewModel.currentLocation == nil ? .puchiPrimary : .red)
                         }
                         
                         Spacer()
                     }
-                    .foregroundColor(.puchiPrimary)
                     
                     // Location Label
                     if let location = viewModel.currentLocation {
@@ -95,6 +100,13 @@ struct MainContent: View {
                             Text(location.placeName)
                                 .font(.system(size: 14, weight: .medium, design: .rounded))
                                 .foregroundColor(.textSecondary)
+                            Spacer()
+                            Button("Remove") {
+                                HapticManager.light()
+                                viewModel.removeLocation()
+                            }
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.red)
                         }
                         .padding(.horizontal)
                         .transition(.opacity)

@@ -1,12 +1,20 @@
 # Implementation Plan
 
-- [ ] 1. Fix location button functionality to allow removal
+- [x] 1. Fix location button functionality to allow removal
+
+
+
+
   - Modify location button in MainContentView to show "Remove" text and red color when location is added
   - Update button action to call removeLocation() method when location exists
   - Add removeLocation() method to LoveJournalViewModel that clears currentLocation
   - Update LocationDisplayView to include remove button functionality
   - Write unit tests for location add/remove functionality
+
   - _Requirements: 1.1, 1.2, 1.3_
+
+
+
 
 - [ ] 2. Implement multiple media selection with video support
   - [ ] 2.1 Create enhanced MediaManager class for multiple media handling
