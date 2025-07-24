@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct CustomTextField: View {
     let placeholder: String
@@ -20,6 +21,7 @@ struct CustomTextField: View {
             .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
     }
 }
+
 // MARK: - Partner Header Components (from HeaderComponents.swift)
 struct PartnerHeaderView: View {
     let partnerName: String

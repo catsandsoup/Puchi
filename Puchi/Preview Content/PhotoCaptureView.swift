@@ -17,19 +17,21 @@ struct PhotoCaptureView: View {
     var body: some View {
         VStack(spacing: 16) {
             // Selected Photos Grid
-            if !viewModel.selectedImages.isEmpty {
+            if !viewModel.mediaManager.selectedMedia.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        ForEach(viewModel.selectedImages.indices, id: \.self) { index in
+                        ForEach(Array(viewModel.mediaManager.selectedMedia.enumerated()), id: \.element.id) { index, mediaItem in
                             ZStack(alignment: .topTrailing) {
-                                Image(uiImage: viewModel.selectedImages[index])
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 100, height: 100)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                if let image = UIImage(data: mediaItem.data) {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 100, height: 100)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
                                 
                                 Button {
-                                    viewModel.removeImage(at: index)
+                                    viewModel.removeMediaItem(at: index)
                                 } label: {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.white)
@@ -79,8 +81,8 @@ struct PhotoCaptureView: View {
             }
         }
         .sheet(isPresented: $showCamera) {
-            ImagePicker(sourceType: .camera, selectedImage: { image in
-                viewModel.addImage(image)
+            MediaPicker(sourceType: .camera, allowsMultipleSelection: false, onMediaSelected: { mediaItems in
+                viewModel.addMediaItems(mediaItems)
             })
         }
     }
