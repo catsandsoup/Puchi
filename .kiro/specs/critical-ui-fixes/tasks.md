@@ -9,9 +9,25 @@
   - Update button action to call removeLocation() method when location exists
   - Add removeLocation() method to LoveJournalViewModel that clears currentLocation
   - Update LocationDisplayView to include remove button functionality
+
   - Write unit tests for location add/remove functionality
 
+
+
+
+
+
+
   - _Requirements: 1.1, 1.2, 1.3_
+
+
+
+
+
+
+
+
+
 
 
 
@@ -86,14 +102,18 @@
 
   - [ ] 5.2 Enhance SettingsView with improved reset functionality
     - Update SettingsView to accept LoveJournalViewModel as parameter
+
+
     - Improve app reset confirmation dialog with clearer warnings
+
     - Add partner name change functionality with immediate UI updates
     - Implement proper data cleanup for app reset including media files
     - Write integration tests for settings functionality
     - _Requirements: 5.3, 5.4, 5.5_
 
 - [ ] 6. Implement comprehensive error handling and user feedback
-  - [ ] 6.1 Add location service error handling
+  - [x] 6.1 Add location service error handling
+
     - Create LocationError enum with user-friendly error messages
     - Add proper error handling for location permission denial
     - Implement graceful degradation when location services unavailable

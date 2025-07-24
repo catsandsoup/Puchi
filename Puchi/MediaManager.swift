@@ -43,57 +43,19 @@ class MediaManager: ObservableObject {
         selectedMedia.removeAll()
     }
     
-    // MARK: - Media Processing
-    
-    func processImages(_ images: [UIImage]) async {
-        isProcessing = true
-        defer { isProcessing = false }
-        
-        for image in images {
-            addImage(image)
-        }
-    }
-    
-    func processVideos(_ urls: [URL]) async {
-        isProcessing = true
-        defer { isProcessing = false }
-        
-        for url in urls {
-            addVideo(from: url)
-        }
-    }
+
     
     // MARK: - Utility Methods
     
-    var hasMedia: Bool {
-        return !selectedMedia.isEmpty
-    }
+    var hasMedia: Bool { !selectedMedia.isEmpty }
+    var mediaCount: Int { selectedMedia.count }
+    var imageCount: Int { selectedMedia.filter { $0.type == .image }.count }
+    var videoCount: Int { selectedMedia.filter { $0.type == .video }.count }
     
-    var mediaCount: Int {
-        return selectedMedia.count
-    }
+    func getMediaItems(of type: MediaType) -> [MediaItem] { selectedMedia.filter { $0.type == type } }
     
-    var imageCount: Int {
-        return selectedMedia.filter { $0.type == .image }.count
-    }
-    
-    var videoCount: Int {
-        return selectedMedia.filter { $0.type == .video }.count
-    }
-    
-    func getMediaItems(of type: MediaType) -> [MediaItem] {
-        return selectedMedia.filter { $0.type == type }
-    }
-    
-    // MARK: - Data Conversion
-    
-    func getImages() -> [MediaItem] {
-        return getMediaItems(of: .image)
-    }
-    
-    func getVideos() -> [MediaItem] {
-        return getMediaItems(of: .video)
-    }
+    func getImages() -> [MediaItem] { getMediaItems(of: .image) }
+    func getVideos() -> [MediaItem] { getMediaItems(of: .video) }
     
     // MARK: - Validation
     

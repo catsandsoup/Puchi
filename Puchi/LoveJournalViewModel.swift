@@ -8,9 +8,6 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     @Published var loveNote = ""
     @Published var currentStreak = 0
     @Published var savedNotes: [LoveNote] = []
-    @Published var selectedImages: [UIImage] = []
-    @Published var selectedVideos: [URL] = []
-    
     // MARK: - Media Manager
     @Published var mediaManager = MediaManager()
     @Published var currentLocation: LocationData?
@@ -47,76 +44,9 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     }
     
     // MARK: - Media Management
-    func addImage(_ image: UIImage) {
-        selectedImages.append(image)
-        mediaManager.addImage(image)
-    }
-    
-    func removeImage(at index: Int) {
-        selectedImages.remove(at: index)
-        // Also remove from media manager if indices match
-        if index < mediaManager.getImages().count {
-            let imageItems = mediaManager.getImages()
-            mediaManager.removeMedia(withId: imageItems[index].id)
-        }
-    }
-    
-    func addVideo(_ url: URL) {
-        selectedVideos.append(url)
-        mediaManager.addVideo(from: url)
-    }
-    
-    func removeVideo(at index: Int) {
-        selectedVideos.remove(at: index)
-        // Also remove from media manager if indices match
-        if index < mediaManager.getVideos().count {
-            let videoItems = mediaManager.getVideos()
-            mediaManager.removeMedia(withId: videoItems[index].id)
-        }
-    }
-    
-    // MARK: - Enhanced Media Management
-    func addMediaItems(_ items: [MediaItem]) {
-        mediaManager.addMedia(items)
-        
-        // Update legacy arrays for backward compatibility
-        for item in items {
-            switch item.type {
-            case .image:
-                if let image = UIImage(data: item.data) {
-                    selectedImages.append(image)
-                }
-            case .video:
-                // Create temporary URL for video data
-                let tempURL = FileManager.default.temporaryDirectory
-                    .appendingPathComponent(item.filename)
-                do {
-                    try item.data.write(to: tempURL)
-                    selectedVideos.append(tempURL)
-                } catch {
-                    print("Failed to create temporary video file: \(error)")
-                }
-            }
-        }
-    }
-    
-    func removeMediaItem(at index: Int) {
-        mediaManager.removeMedia(at: index)
-        
-        // Update legacy arrays - this is a simplified approach
-        // In a full implementation, you'd want to track the mapping more precisely
-        if index < selectedImages.count {
-            selectedImages.remove(at: index)
-        } else if index - selectedImages.count < selectedVideos.count {
-            selectedVideos.remove(at: index - selectedImages.count)
-        }
-    }
-    
-    func clearAllMedia() {
-        selectedImages.removeAll()
-        selectedVideos.removeAll()
-        mediaManager.clearAllMedia()
-    }
+    func addMediaItems(_ items: [MediaItem]) { mediaManager.addMedia(items) }
+    func removeMediaItem(at index: Int) { mediaManager.removeMedia(at: index) }
+    func clearAllMedia() { mediaManager.clearAllMedia() }
     
     // MARK: - Location Management
     func requestLocationPermission() {
@@ -155,23 +85,9 @@ class LoveJournalViewModel: NSObject, ObservableObject {
     func saveLoveNote() {
         guard !loveNote.isEmpty else { return }
         
-        // Convert images to data
-        let imageData = selectedImages.compactMap { $0.optimizedForStorage() }
-        
-        // Convert videos to data
-        let videoData = selectedVideos.compactMap { try? Data(contentsOf: $0) }
-        
-        // Create media items
-        var images: [MediaItem]?
-        var videos: [MediaItem]?
-        
-        if !imageData.isEmpty {
-            images = imageData.map { MediaItem(data: $0, type: .image) }
-        }
-        
-        if !videoData.isEmpty {
-            videos = videoData.map { MediaItem(data: $0, type: .video) }
-        }
+        // Use MediaManager's media items directly
+        let imageItems = mediaManager.getImages()
+        let videoItems = mediaManager.getVideos()
         
         let newNote = LoveNote(
             id: UUID(),
@@ -179,8 +95,8 @@ class LoveJournalViewModel: NSObject, ObservableObject {
             partnerName: storedPartnerName,
             date: Date(),
             noteNumber: savedNotes.count + 1,
-            images: images,
-            videos: videos,
+            images: imageItems.isEmpty ? nil : imageItems,
+            videos: videoItems.isEmpty ? nil : videoItems,
             location: currentLocation,
             tags: [],
             relatedMilestoneId: nil,

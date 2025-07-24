@@ -38,13 +38,14 @@ struct MainContent: View {
                     )
                     .frame(maxWidth: .infinity)
                     
-                    // Media Preview
-                    if !viewModel.selectedImages.isEmpty || !viewModel.selectedVideos.isEmpty {
-                        MediaPreviewView(
-                            mediaItem: MediaItem(
-                                data: viewModel.selectedImages.first?.jpegData(compressionQuality: 0.8) ?? Data(),
-                                type: .image
-                            )
+                    // Media Preview Grid
+                    if !viewModel.mediaManager.selectedMedia.isEmpty {
+                        MediaPreviewGrid(
+                            mediaItems: viewModel.mediaManager.selectedMedia,
+                            onRemove: { index in
+                                HapticManager.light()
+                                viewModel.removeMediaItem(at: index)
+                            }
                         )
                     }
                     
@@ -162,13 +163,152 @@ struct MainContent: View {
         .sheet(isPresented: $viewModel.showSourceTypeSheet) {
             MediaPicker(
                 sourceType: viewModel.selectedSourceType,
-                onImageSelected: { image in
-                    viewModel.addImage(image)
-                },
-                onVideoSelected: { url in
-                    viewModel.addVideo(url)
+                allowsMultipleSelection: true,
+                onMediaSelected: { mediaItems in
+                    viewModel.addMediaItems(mediaItems)
                 }
             )
+        }
+    }
+}
+// MARK: - Media Preview Components
+struct MediaPreviewGrid: View {
+    let mediaItems: [MediaItem]
+    let onRemove: (Int) -> Void
+    
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
+    
+    var body: some View {
+        LazyVGrid(columns: columns, spacing: 8) {
+            ForEach(Array(mediaItems.enumerated()), id: \.element.id) { index, item in
+                MediaPreviewCard(
+                    mediaItem: item,
+                    onRemove: { onRemove(index) }
+                )
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+}
+
+struct MediaPreviewCard: View {
+    let mediaItem: MediaItem
+    let onRemove: () -> Void
+    
+    var body: some View {
+        ZStack {
+            // Media content
+            Group {
+                switch mediaItem.type {
+                case .image:
+                    if let image = UIImage(data: mediaItem.data) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } else {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .overlay(
+                                Image(systemName: "photo")
+                                    .foregroundColor(.gray)
+                            )
+                    }
+                case .video:
+                    VideoThumbnailView(data: mediaItem.data)
+                        .overlay(
+                            Image(systemName: "play.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.white)
+                                .shadow(radius: 2)
+                        )
+                }
+            }
+            .frame(height: 100)
+            .clipped()
+            .cornerRadius(8)
+            
+            // Remove button
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: onRemove) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.white)
+                            .background(Color.black.opacity(0.6))
+                            .clipShape(Circle())
+                    }
+                    .padding(4)
+                }
+                Spacer()
+            }
+            
+            // Media type indicator
+            VStack {
+                Spacer()
+                HStack {
+                    Image(systemName: mediaItem.type.systemImage)
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .padding(4)
+                        .background(Color.black.opacity(0.6))
+                        .cornerRadius(4)
+                    Spacer()
+                }
+                .padding(4)
+            }
+        }
+    }
+}
+
+struct VideoThumbnailView: View {
+    let data: Data
+    @State private var thumbnail: UIImage?
+    
+    var body: some View {
+        Group {
+            if let thumbnail = thumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .overlay(
+                        Image(systemName: "video")
+                            .foregroundColor(.gray)
+                    )
+            }
+        }
+        .onAppear {
+            generateThumbnail()
+        }
+    }
+    
+    private func generateThumbnail() {
+        Task {
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension("mp4")
+            
+            do {
+                try data.write(to: tempURL)
+                let asset = AVAsset(url: tempURL)
+                let imageGenerator = AVAssetImageGenerator(asset: asset)
+                imageGenerator.appliesPreferredTrackTransform = true
+                
+                let time = CMTime(seconds: 1, preferredTimescale: 60)
+                let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+                
+                await MainActor.run {
+                    self.thumbnail = UIImage(cgImage: cgImage)
+                }
+                
+                try? FileManager.default.removeItem(at: tempURL)
+            } catch {
+                print("Failed to generate video thumbnail: \(error)")
+                try? FileManager.default.removeItem(at: tempURL)
+            }
         }
     }
 }

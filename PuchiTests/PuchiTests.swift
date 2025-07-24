@@ -576,5 +576,125 @@ struct PuchiTests {
         #expect(allCases.contains(.image))
         #expect(allCases.contains(.video))
     }
+    
+    // MARK: - MediaManager UIImage and Video URL Handling Tests
+    
+    @Test func testMediaManagerAddImageFromUIImage() async throws {
+        let mediaManager = MediaManager()
+        
+        // Create a test UIImage (1x1 pixel)
+        let size = CGSize(width: 1, height: 1)
+        UIGraphicsBeginImageContext(size)
+        let context = UIGraphicsGetCurrentContext()
+        context?.setFillColor(UIColor.red.cgColor)
+        context?.fill(CGRect(origin: .zero, size: size))
+        let testImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        // Add image using UIImage method
+        mediaManager.addImage(testImage, filename: "test_ui_image.jpg")
+        
+        #expect(mediaManager.mediaCount == 1)
+        #expect(mediaManager.imageCount == 1)
+        #expect(mediaManager.videoCount == 0)
+        
+        let addedImage = mediaManager.getImages().first!
+        #expect(addedImage.filename == "test_ui_image.jpg")
+        #expect(addedImage.type == .image)
+        #expect(!addedImage.data.isEmpty)
+    }
+    
+    @Test func testMediaManagerAddVideoFromURL() async throws {
+        let mediaManager = MediaManager()
+        
+        // Create temporary video file for testing
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_video.mp4")
+        
+        let testVideoData = Data([0x00, 0x00, 0x00, 0x20]) // Mock MP4 header
+        try testVideoData.write(to: tempURL)
+        
+        // Add video using URL method
+        mediaManager.addVideo(from: tempURL, filename: "test_video.mp4")
+        
+        #expect(mediaManager.mediaCount == 1)
+        #expect(mediaManager.videoCount == 1)
+        #expect(mediaManager.imageCount == 0)
+        
+        let addedVideo = mediaManager.getVideos().first!
+        #expect(addedVideo.filename == "test_video.mp4")
+        #expect(addedVideo.type == .video)
+        #expect(!addedVideo.data.isEmpty)
+        
+        // Clean up
+        try? FileManager.default.removeItem(at: tempURL)
+    }
+    
+    @Test func testMediaManagerProcessingMethods() async throws {
+        let mediaManager = MediaManager()
+        
+        // Create test UIImages
+        let size = CGSize(width: 1, height: 1)
+        UIGraphicsBeginImageContext(size)
+        let context = UIGraphicsGetCurrentContext()
+        context?.setFillColor(UIColor.blue.cgColor)
+        context?.fill(CGRect(origin: .zero, size: size))
+        let testImage1 = UIGraphicsGetImageFromCurrentImageContext()!
+        
+        context?.setFillColor(UIColor.green.cgColor)
+        context?.fill(CGRect(origin: .zero, size: size))
+        let testImage2 = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        // Test processing multiple images
+        await mediaManager.processImages([testImage1, testImage2])
+        
+        #expect(mediaManager.imageCount == 2)
+        #expect(!mediaManager.isProcessing) // Should be false after processing
+        
+        // Create test video URLs
+        let tempURL1 = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_video1.mp4")
+        let tempURL2 = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_video2.mp4")
+        
+        let testVideoData = Data([0x00, 0x00, 0x00, 0x20])
+        try testVideoData.write(to: tempURL1)
+        try testVideoData.write(to: tempURL2)
+        
+        // Test processing multiple videos
+        await mediaManager.processVideos([tempURL1, tempURL2])
+        
+        #expect(mediaManager.videoCount == 2)
+        #expect(mediaManager.mediaCount == 4) // 2 images + 2 videos
+        #expect(!mediaManager.isProcessing)
+        
+        // Clean up
+        try? FileManager.default.removeItem(at: tempURL1)
+        try? FileManager.default.removeItem(at: tempURL2)
+    }
+    
+    @Test func testMediaManagerFormResetFunctionality() async throws {
+        let mediaManager = MediaManager()
+        
+        // Add some test media
+        let items = [
+            MediaItem(data: Data([1, 2, 3]), type: .image, filename: "image1.jpg"),
+            MediaItem(data: Data([4, 5, 6]), type: .video, filename: "video1.mp4")
+        ]
+        
+        mediaManager.addMedia(items)
+        #expect(mediaManager.mediaCount == 2)
+        #expect(mediaManager.hasMedia)
+        
+        // Test form reset (clearAllMedia)
+        mediaManager.clearAllMedia()
+        
+        #expect(mediaManager.mediaCount == 0)
+        #expect(!mediaManager.hasMedia)
+        #expect(mediaManager.selectedMedia.isEmpty)
+        #expect(mediaManager.imageCount == 0)
+        #expect(mediaManager.videoCount == 0)
+    }
 
 }
