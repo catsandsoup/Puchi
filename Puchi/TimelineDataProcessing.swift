@@ -17,34 +17,25 @@ extension Array where Element == LoveNote {
         // Create test notes across different months
         let testNotes = [
             LoveNote(
-                id: UUID(),
                 text: "Recent note",
                 partnerName: "Test",
                 date: now,
                 noteNumber: 3,
-                images: nil,
-                videos: nil,
-                location: nil
+                tags: ["recent", "test"]
             ),
             LoveNote(
-                id: UUID(),
                 text: "Last month note",
                 partnerName: "Test",
                 date: calendar.date(byAdding: .month, value: -1, to: now) ?? now,
                 noteNumber: 2,
-                images: nil,
-                videos: nil,
-                location: nil
+                tags: ["past", "test"]
             ),
             LoveNote(
-                id: UUID(),
                 text: "Two months ago note",
                 partnerName: "Test",
                 date: calendar.date(byAdding: .month, value: -2, to: now) ?? now,
                 noteNumber: 1,
-                images: nil,
-                videos: nil,
-                location: nil
+                tags: ["old", "test"]
             )
         ]
         

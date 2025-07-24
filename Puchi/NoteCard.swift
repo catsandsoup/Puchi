@@ -184,7 +184,6 @@ struct NoteCard: View {
 #Preview {
     NoteCard(
         note: LoveNote(
-            id: UUID(),
             text: "Sample love note text for preview",
             partnerName: "Partner",
             date: Date(),
@@ -193,7 +192,8 @@ struct NoteCard: View {
                 latitude: 0,
                 longitude: 0,
                 placeName: "Sample Location"
-            )
+            ),
+            tags: ["preview", "sample"]
         ),
         onDelete: {}
     )

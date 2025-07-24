@@ -8,7 +8,12 @@
   - _Requirements: 5.1, 5.4_
 
 - [ ] 2. Create new data models and enums
-  - [ ] 2.1 Implement enhanced LoveNote model with relationships
+  - [x] 2.1 Implement enhanced LoveNote model with relationships
+
+
+
+
+
     - Add tags, relatedMilestoneId, relatedGoalId, and isFavorite properties to existing LoveNote struct
     - Create MilestoneCategory enum (Anniversary, FirstTime, Achievement, Custom)
     - Create GoalCategory enum (Relationship, PersonalGrowth, SharedExperience, FuturePlans)

@@ -204,8 +204,7 @@ struct TimePeriodHeader: View {
         .padding(.vertical, 12)
     }
 }
-// M
-ARK: - Timeline Data Processing
+// MARK: - Timeline Data Processing
 extension Array where Element == LoveNote {
     /// Groups notes by month/year for timeline display
     func groupedByMonth() -> [(Date, [LoveNote])] {
@@ -314,34 +313,27 @@ struct TimelineView: View {
 #Preview {
     let sampleNotes = [
         LoveNote(
-            id: UUID(),
             text: "You make every day brighter with your smile. I love how you laugh at my silly jokes and make even the mundane moments feel special.",
             partnerName: "Sarah",
             date: Date(),
             noteNumber: 3,
-            images: nil,
-            videos: nil,
-            location: LocationData(latitude: 0, longitude: 0, placeName: "Home")
+            location: LocationData(latitude: 0, longitude: 0, placeName: "Home"),
+            tags: ["smile", "happiness"],
+            isFavorite: true
         ),
         LoveNote(
-            id: UUID(),
             text: "Thank you for being my rock today. Your support means everything to me.",
             partnerName: "Sarah",
             date: Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date(),
             noteNumber: 2,
-            images: nil,
-            videos: nil,
-            location: nil
+            tags: ["support", "gratitude"]
         ),
         LoveNote(
-            id: UUID(),
             text: "First note in our love story! Here's to many more beautiful moments together.",
             partnerName: "Sarah",
             date: Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date(),
             noteNumber: 1,
-            images: nil,
-            videos: nil,
-            location: nil
+            tags: ["first", "beginning"]
         )
     ]
     

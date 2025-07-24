@@ -118,7 +118,11 @@ class LoveJournalViewModel: NSObject, ObservableObject {
             noteNumber: savedNotes.count + 1,
             images: images,
             videos: videos,
-            location: currentLocation
+            location: currentLocation,
+            tags: [],
+            relatedMilestoneId: nil,
+            relatedGoalId: nil,
+            isFavorite: false
         )
         
         savedNotes.insert(newNote, at: 0)
