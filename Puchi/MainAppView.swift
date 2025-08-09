@@ -61,7 +61,7 @@ struct MainAppView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Puchi")
+                    Text(currentPage == 0 ? "Puchi" : "Love Timeline")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundColor(.puchiPrimary)
                 }

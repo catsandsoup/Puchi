@@ -234,58 +234,40 @@ struct TimelineView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            Text("Love Timeline")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(.puchiPrimary)
-                .padding(.top, 16)
-                .padding(.bottom, 8)
             
             if notes.isEmpty {
                 // Empty state with navigation hint
                 VStack(spacing: 20) {
+                    Spacer()
                     Spacer()
                     
                     Image(systemName: "heart.text.square")
                         .font(.system(size: 60))
                         .foregroundColor(.puchiPrimary.opacity(0.6))
                     
-                    Text("Your Love Story Awaits")
+                    Text("Your love story awaits")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundColor(.puchiPrimary)
                     
-                    Text("Start writing love notes to see your beautiful timeline unfold")
-                        .font(.system(size: 16, design: .rounded))
-                        .foregroundColor(.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                    
                     // Navigation hint for empty timeline
-                    VStack(spacing: 12) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.left")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.puchiPrimary)
-                            Text("Swipe back to write your first note")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(.puchiPrimary)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(
-                            Capsule()
-                                .fill(Color.puchiPrimary.opacity(0.1))
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color.puchiPrimary.opacity(0.3), lineWidth: 1)
-                                )
-                        )
-                        
-                        Text("💝 Capture your precious moments together")
-                            .font(.system(size: 13, design: .rounded))
-                            .foregroundColor(.textSecondary.opacity(0.8))
-                            .multilineTextAlignment(.center)
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.left")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.puchiPrimary)
+                        Text("Swipe back to write your first note")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(.puchiPrimary)
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(Color.puchiPrimary.opacity(0.1))
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.puchiPrimary.opacity(0.3), lineWidth: 1)
+                            )
+                    )
                     .padding(.top, 8)
                     
                     Spacer()
@@ -298,7 +280,7 @@ struct TimelineView: View {
                         ForEach(groupedNotes, id: \.0) { monthDate, monthNotes in
                             // Time period header
                             TimePeriodHeader(date: monthDate)
-                                .padding(.top, groupedNotes.first?.0 == monthDate ? 8 : 24)
+                                .padding(.top, groupedNotes.first?.0 == monthDate ? 16 : 24)
                             
                             // Notes for this month
                             ForEach(monthNotes.sorted(by: { $0.date > $1.date })) { note in
