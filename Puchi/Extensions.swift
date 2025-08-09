@@ -117,9 +117,16 @@ extension UIImage {
         let maxDimension: CGFloat = 1024
         var newImage = self
         
-        if max(size.width, size.height) > maxDimension {
-            let scale = maxDimension / max(size.width, size.height)
+        // Prevent NaN by checking for valid dimensions
+        let maxSize = max(size.width, size.height)
+        if maxSize > maxDimension && maxSize > 0 {
+            let scale = maxDimension / maxSize
             let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+            
+            // Additional safety check for valid new size
+            guard newSize.width > 0 && newSize.height > 0 else {
+                return self.jpegData(compressionQuality: 0.5)
+            }
             
             UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
             draw(in: CGRect(origin: .zero, size: newSize))

@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 import CoreLocation
+import Photos
+import AVFoundation
 
 // MARK: - Error Types
 enum PuchiError: LocalizedError {
@@ -61,6 +63,10 @@ enum PuchiError: LocalizedError {
 class ErrorHandler: ObservableObject {
     @Published var currentError: PuchiError?
     @Published var showingError = false
+    @Published var showingRecoveryAction = false
+    @Published var isRetrying = false
+    
+    var retryAction: (() -> Void)?
     
     func handle(_ error: Error) {
         let puchiError: PuchiError
@@ -76,8 +82,16 @@ class ErrorHandler: ObservableObject {
         currentError = puchiError
         showingError = true
         
+        // Add haptic feedback for errors
+        HapticManager.error()
+        
         // Log error for debugging (without user data)
         logError(puchiError)
+    }
+    
+    func handleWithRetry(_ error: Error, retryAction: @escaping () -> Void) {
+        self.retryAction = retryAction
+        handle(error)
     }
     
     private func handleLocationError(_ error: CLError) -> PuchiError {
@@ -94,15 +108,32 @@ class ErrorHandler: ObservableObject {
     }
     
     private func logError(_ error: PuchiError) {
-        print("PuchiError: \(error.localizedDescription ?? "Unknown error")")
+        print("PuchiError: \(error.localizedDescription)")
         if let recovery = error.recoverySuggestion {
             print("Recovery: \(recovery)")
+        }
+    }
+    
+    func executeRetry() {
+        guard let retry = retryAction else { return }
+        
+        isRetrying = true
+        showingError = false
+        
+        // Provide visual feedback for retry
+        HapticManager.light()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            retry()
+            self.isRetrying = false
         }
     }
     
     func clearError() {
         currentError = nil
         showingError = false
+        showingRecoveryAction = false
+        retryAction = nil
     }
 }
 
@@ -209,18 +240,39 @@ struct ErrorAlertView: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .alert("Error", isPresented: $errorHandler.showingError) {
-                Button("OK") {
-                    errorHandler.clearError()
+            .alert("Oops! Something went wrong", isPresented: $errorHandler.showingError) {
+                // Primary action - Retry if available
+                if errorHandler.retryAction != nil {
+                    Button("Try Again") {
+                        errorHandler.executeRetry()
+                    }
                 }
+                
+                // Settings action for permission errors
                 if let error = errorHandler.currentError,
-                   error.recoverySuggestion != nil {
+                   case .locationAccessDenied = error {
+                    Button("Open Settings") {
+                        if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(settingsUrl)
+                        }
+                        errorHandler.clearError()
+                    }
+                }
+                
+                // General settings action for other permission errors
+                if let error = errorHandler.currentError,
+                   case .permissionDenied(_) = error {
                     Button("Settings") {
                         if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
                             UIApplication.shared.open(settingsUrl)
                         }
                         errorHandler.clearError()
                     }
+                }
+                
+                // Cancel/Dismiss action
+                Button("Dismiss", role: .cancel) {
+                    errorHandler.clearError()
                 }
             } message: {
                 if let error = errorHandler.currentError {
@@ -229,10 +281,36 @@ struct ErrorAlertView: ViewModifier {
                         if let recovery = error.recoverySuggestion {
                             Text(recovery)
                                 .font(.caption)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
             }
+            // Loading overlay for retry actions
+            .overlay(
+                Group {
+                    if errorHandler.isRetrying {
+                        ZStack {
+                            Color.black.opacity(0.3)
+                                .ignoresSafeArea()
+                            
+                            VStack(spacing: 16) {
+                                ProgressView()
+                                    .scaleEffect(1.2)
+                                Text("Retrying...")
+                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(24)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.black.opacity(0.8))
+                            )
+                        }
+                        .transition(.opacity)
+                    }
+                }
+            )
     }
 }
 

@@ -38,6 +38,7 @@ enum HapticManager {
     }
 }
 
+
 // MARK: - Animation Modifiers
 struct ScaleButtonStyle: ButtonStyle {
     var scale: CGFloat = 0.97
@@ -62,6 +63,40 @@ struct PressableButtonStyle: ButtonStyle {
                     HapticManager.light()
                 }
             }
+    }
+}
+
+// MARK: - Simplified Button with Debouncing
+struct DebouncedButton<Label: View>: View {
+    let action: () -> Void
+    let debounceTime: TimeInterval
+    let label: Label
+    
+    @State private var isDebouncing = false
+    private let debounceQueue = DispatchQueue.main
+    
+    init(debounceTime: TimeInterval = 0.5, action: @escaping () -> Void, @ViewBuilder label: () -> Label) {
+        self.action = action
+        self.debounceTime = debounceTime
+        self.label = label()
+    }
+    
+    var body: some View {
+        Button {
+            guard !isDebouncing else { return }
+            
+            isDebouncing = true
+            action()
+            
+            debounceQueue.asyncAfter(deadline: .now() + debounceTime) {
+                isDebouncing = false
+            }
+        } label: {
+            label
+                .opacity(isDebouncing ? 0.7 : 1.0)
+                .animation(.easeInOut(duration: 0.15), value: isDebouncing)
+        }
+        .disabled(isDebouncing)
     }
 }
 

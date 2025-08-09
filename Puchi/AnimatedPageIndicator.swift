@@ -27,11 +27,12 @@ struct AnimatedPageIndicator: View {
                     }
             }
         }
-        .padding(8)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(
             Capsule()
                 .fill(Color.background)
-                .shadow(color: .black.opacity(0.05), radius: 4)
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
         )
     }
 }

@@ -169,8 +169,11 @@ struct NoteCard: View {
         
         if let presentationController = activityVC.popoverPresentationController {
             presentationController.sourceView = window
-            presentationController.sourceRect = CGRect(x: window.frame.width / 2,
-                                                     y: window.frame.height / 2,
+            // Prevent NaN by ensuring non-zero frame dimensions
+            let safeX = window.frame.width > 0 ? window.frame.width / 2 : 0
+            let safeY = window.frame.height > 0 ? window.frame.height / 2 : 0
+            presentationController.sourceRect = CGRect(x: safeX,
+                                                     y: safeY,
                                                      width: 0,
                                                      height: 0)
             presentationController.permittedArrowDirections = []

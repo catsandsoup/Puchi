@@ -77,11 +77,16 @@ struct NoteEntryView: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(
-                            isFocused ? Color.puchiPrimary.opacity(0.3) : Color.clear,
-                            lineWidth: 1
+                            isFocused ? Color.puchiPrimary.opacity(0.5) : Color.gray.opacity(0.2),
+                            lineWidth: isFocused ? 2 : 1
                         )
                 )
-                .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
+                .shadow(
+                    color: isFocused ? Color.puchiPrimary.opacity(0.1) : Color.black.opacity(0.02),
+                    radius: isFocused ? 8 : 4,
+                    x: 0,
+                    y: isFocused ? 4 : 2
+                )
             
             if text.isEmpty {
                 Text(placeholder)

@@ -1,0 +1,29 @@
+{
+  "permissions": {
+      "Bash(xcodebuild:*)",
+      "Bash(xcode-select:*)",
+      "Bash(xcrun swift:*)",
+      "Bash(xcrun xcodebuild:*)",
+      "Bash(mas search:*)",
+      "Bash(brew install:*)",
+      "Bash(sudo mas:*)",
+      "Bash(mas install:*)",
+      "Bash(sudo xcode-select:*)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -version)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer sudo xcodebuild -license accept)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -license)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl list devices)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project Puchi.xcodeproj -scheme Puchi -destination \"platform=iOS Simulator,name=iPhone 16,OS=18.5\" build)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl boot \"iPhone 16\")",
+      "Bash(true)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl install \"iPhone 16\" \"/Users/montygiovenco/Library/Developer/Xcode/DerivedData/Puchi-cjtysqfyhvnknueldowyqobwypjf/Build/Products/Debug-iphonesimulator/Puchi.app\")",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl list apps \"iPhone 16\")",
+      "Bash(open:*)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild clean -project Puchi.xcodeproj -scheme Puchi)",
+      "Bash(swift:*)",
+      "Bash(grep:*)",
+      "Bash(export CG_NUMERICS_SHOW_BACKTRACE=1)"
+    ],
+    "deny": []
+  }
+}

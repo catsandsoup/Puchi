@@ -24,7 +24,7 @@ struct FloatingHeartView: View {
             .delay(heart.animationDelay)
         ) {
             // Move upward with fade
-            let newPosition = CGPoint(
+            let _ = CGPoint(
                 x: heart.position.x,
                 y: -50
             )
@@ -86,9 +86,13 @@ struct EnchantedHeartsView: View {
     }
     
     private func createHeart(in geometry: GeometryProxy) -> FloatingHeart {
-        FloatingHeart(
+        // Prevent NaN by ensuring valid range for random positioning
+        let maxX = max(100, geometry.size.width - 50) // Ensure minimum range
+        let safeX = geometry.size.width > 100 ? CGFloat.random(in: 50...maxX) : geometry.size.width / 2
+        
+        return FloatingHeart(
             position: CGPoint(
-                x: CGFloat.random(in: 50...(geometry.size.width - 50)),
+                x: safeX,
                 y: geometry.size.height + 20
             ),
             scale: CGFloat.random(in: 0.4...0.6),
