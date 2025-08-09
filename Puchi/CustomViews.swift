@@ -105,11 +105,21 @@ struct NoteEntryView: View {
                 .padding(.vertical, 12)
                 .background(Color.clear)
                 .scrollContentBackground(.hidden)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") {
+                            isFocused = false
+                        }
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.puchiPrimary)
+                    }
+                }
                 .onSubmit {
                     isFocused = false
                 }
         }
-        .frame(height: 380)
+        .frame(minHeight: 120, maxHeight: isFocused ? 300 : 380)
         .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }

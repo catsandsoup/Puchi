@@ -386,6 +386,32 @@ class LoveJournalViewModel: NSObject, ObservableObject {
         currentLocation = nil
         clearDraft()
     }
+    
+    func clearAllData() {
+        // Reset all state to initial values
+        loveNote = ""
+        currentStreak = 0
+        savedNotes = []
+        hasDraft = false
+        currentLocation = nil
+        isCapturingLocation = false
+        isProcessing = false
+        
+        // Clear media and draft
+        clearAllMedia()
+        clearDraft()
+        
+        // Reset location manager
+        stopCapturingLocation()
+        
+        // Reset hint states
+        hasSeenMediaHint = false
+        hasSeenLocationHint = false
+        
+        // Reset first time user flag
+        isFirstTimeUser = true
+        storedPartnerName = ""
+    }
 }
 
 // MARK: - Draft Data Structure

@@ -333,13 +333,6 @@ struct TimelineView: View {
             // Dismiss any active keyboard when tapping in the timeline view
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
-        .gesture(
-            DragGesture()
-                .onChanged { _ in
-                    // Dismiss keyboard on swipe gestures
-                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                }
-        )
     }
 }
 

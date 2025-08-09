@@ -348,6 +348,13 @@ struct SettingsView: View {
     }
     
     private func exportNotesAsText() {
+        print("🔄 Export function called")
+        
+        guard !viewModel.savedNotes.isEmpty else {
+            print("⚠️ No notes to export")
+            return
+        }
+        
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .full
         dateFormatter.timeStyle = .short
@@ -374,37 +381,76 @@ struct SettingsView: View {
             exportText += "\n" + String(repeating: "-", count: 30) + "\n\n"
         }
         
-        // Share the text
-        let activityVC = UIActivityViewController(
-            activityItems: [exportText],
-            applicationActivities: nil
-        )
+        print("📄 Export text prepared, length: \(exportText.count)")
         
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first,
-           let rootVC = window.rootViewController {
+        // Share the text using a more reliable method
+        DispatchQueue.main.async {
+            let activityVC = UIActivityViewController(
+                activityItems: [exportText],
+                applicationActivities: nil
+            )
             
-            if let presentationController = activityVC.popoverPresentationController {
-                presentationController.sourceView = window
-                // Prevent NaN by ensuring non-zero frame dimensions
-                let safeX = window.frame.width > 0 ? window.frame.width / 2 : 0
-                let safeY = window.frame.height > 0 ? window.frame.height / 2 : 0
-                presentationController.sourceRect = CGRect(x: safeX, y: safeY, width: 0, height: 0)
-                presentationController.permittedArrowDirections = []
+            // Find the topmost view controller
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                
+                var topController = window.rootViewController
+                while let presentedController = topController?.presentedViewController {
+                    topController = presentedController
+                }
+                
+                print("📱 Found top controller: \(String(describing: topController))")
+                
+                if let topController = topController {
+                    // Configure for iPad
+                    if let presentationController = activityVC.popoverPresentationController {
+                        presentationController.sourceView = window
+                        let safeX = max(0, min(window.frame.width / 2, window.frame.width - 50))
+                        let safeY = max(0, min(window.frame.height / 2, window.frame.height - 50))
+                        presentationController.sourceRect = CGRect(x: safeX, y: safeY, width: 50, height: 50)
+                        presentationController.permittedArrowDirections = []
+                    }
+                    
+                    print("🚀 Presenting activity view controller")
+                    topController.present(activityVC, animated: true) {
+                        print("✅ Activity view controller presented successfully")
+                    }
+                } else {
+                    print("❌ Could not find top controller")
+                }
+            } else {
+                print("❌ Could not find window scene")
             }
-            
-            rootVC.present(activityVC, animated: true)
         }
     }
     
     private func resetAllData() {
-        // Clear all stored data
-        UserDefaults.standard.removeObject(forKey: "savedNotes")
-        UserDefaults.standard.removeObject(forKey: "partnerImageData")
-        UserDefaults.standard.removeObject(forKey: "lastNoteDate")
+        // Clear all stored data - comprehensive cleanup
+        let defaults = UserDefaults.standard
+        
+        // Clear core data
+        defaults.removeObject(forKey: "savedNotes")
+        defaults.removeObject(forKey: "partnerImageData")
+        defaults.removeObject(forKey: "lastNoteDate")
+        defaults.removeObject(forKey: "draftNote")
+        
+        // Reset partner info
+        defaults.removeObject(forKey: "partnerName")
         storedPartnerName = ""
         partnerImageData = nil
+        
+        // Reset onboarding and hints
         isFirstTimeUser = true
+        defaults.removeObject(forKey: "hasSeenTimelineHint")
+        defaults.removeObject(forKey: "hasSeenCreateNoteHint") 
+        defaults.removeObject(forKey: "hasSeenMediaHint")
+        defaults.removeObject(forKey: "hasSeenLocationHint")
+        
+        // Clear any navigation state
+        defaults.synchronize()
+        
+        // Reset ViewModel state
+        viewModel.clearAllData()
         
         // Dismiss settings and return to welcome
         dismiss()

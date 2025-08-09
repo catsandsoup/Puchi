@@ -11,6 +11,12 @@ struct MainAppView: View {
     @State private var showingSettings = false
     @FocusState private var isTextFieldFocused: Bool
     
+    private var hasContentInCurrentPage: Bool {
+        currentPage == 0 && (!viewModel.loveNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || 
+                            !viewModel.mediaManager.selectedMedia.isEmpty || 
+                            viewModel.currentLocation != nil)
+    }
+    
     var body: some View {
         NavigationStack {
             NavigationHintsContainer(
@@ -46,13 +52,10 @@ struct MainAppView: View {
                         // Also dismiss any system keyboard
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
-                    .onTapGesture {
-                        isTextFieldFocused = false
-                    }
                     
                     // Custom Page Indicator
                     AnimatedPageIndicator(currentPage: $currentPage, numberOfPages: 2)
-                        .padding(.bottom, 34) // Increased padding to ensure visibility above home indicator
+                        .padding(.bottom, hasContentInCurrentPage ? 94 : 34) // Dynamic padding based on content
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -79,6 +82,22 @@ struct MainAppView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView(viewModel: viewModel)
+            }
+            .onChange(of: selectedPhoto) { _, newPhoto in
+                Task {
+                    if let newPhoto = newPhoto {
+                        if let data = try? await newPhoto.loadTransferable(type: Data.self),
+                           let image = UIImage(data: data),
+                           let optimizedData = image.optimizedForStorage() {
+                            await MainActor.run {
+                                partnerImageData = optimizedData
+                                HapticManager.success()
+                            }
+                        }
+                        // Clear the selectedPhoto to allow selecting the same photo again
+                        selectedPhoto = nil
+                    }
+                }
             }
             .background(Color.puchiBackground)
         }

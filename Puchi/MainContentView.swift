@@ -25,21 +25,39 @@ struct MainContent: View {
         ScrollView {
             VStack(spacing: 24) {
                 headerSection
-                noteCreationSection
+                
+                // Text Input Area
+                NoteEntryView(
+                    text: $viewModel.loveNote,
+                    isFocused: _isTextFieldFocused,
+                    placeholder: "Write a love note to \(partnerName)..."
+                )
+                .padding(.horizontal, 16)
+                
+                // Media & Location Controls
+                mediaControlsSection
+                
+                // Media Preview
+                if !viewModel.mediaManager.selectedMedia.isEmpty {
+                    MediaPreviewGrid(
+                        mediaItems: viewModel.mediaManager.selectedMedia,
+                        onRemove: { index in
+                            viewModel.removeMediaItem(at: index)
+                        }
+                    )
+                }
+                
+                // Location Display
+                if let location = viewModel.currentLocation {
+                    locationDisplaySection(location)
+                }
             }
-            .padding(.bottom, 32)
+        }
+        .safeAreaInset(edge: .bottom) {
+            saveButtonSection
+                .background(Color.puchiBackground.opacity(0.95))
         }
         .background(Color.puchiBackground)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            isTextFieldFocused = false
-        }
-        .gesture(
-            DragGesture()
-                .onChanged { _ in
-                    isTextFieldFocused = false
-                }
-        )
         .onAppear {
             isTextFieldFocused = false
         }
@@ -65,39 +83,6 @@ struct MainContent: View {
         }
     }
     
-    // MARK: - Note Creation Section
-    private var noteCreationSection: some View {
-        VStack(spacing: 20) {
-            // Text Input Area
-            NoteEntryView(
-                text: $viewModel.loveNote,
-                isFocused: _isTextFieldFocused,
-                placeholder: "Write a love note to \(partnerName)..."
-            )
-            
-            // Media & Location Controls
-            mediaControlsSection
-            
-            // Media Preview
-            if !viewModel.mediaManager.selectedMedia.isEmpty {
-                MediaPreviewGrid(
-                    mediaItems: viewModel.mediaManager.selectedMedia,
-                    onRemove: { index in
-                        viewModel.removeMediaItem(at: index)
-                    }
-                )
-            }
-            
-            // Location Display
-            if let location = viewModel.currentLocation {
-                locationDisplaySection(location)
-            }
-            
-            // Save Button
-            saveButtonSection
-        }
-        .padding(.horizontal, 16)
-    }
     
     // MARK: - Media Controls Section
     private var mediaControlsSection: some View {
@@ -229,6 +214,7 @@ struct MainContent: View {
         .disabled(viewModel.loveNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isProcessing)
         .opacity((viewModel.loveNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isProcessing) ? 0.6 : 1.0)
         .padding(.horizontal, 16)
+        .padding(.bottom, 34) // Safe area padding for bottom
     }
 }
 // MARK: - Media Preview Components
@@ -293,15 +279,16 @@ struct MediaPreviewCard: View {
                     Spacer()
                     Button(action: onRemove) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.title2) // Slightly larger icon
+                            .font(.title) // Larger icon for better visibility
                             .foregroundColor(.white)
-                            .frame(width: 28, height: 28) // Ensure minimum touch target
-                            .background(Color.black.opacity(0.7))
+                            .frame(width: 32, height: 32) // Larger touch target
+                            .background(Color.red.opacity(0.9)) // More prominent red background
                             .clipShape(Circle())
                             .contentShape(Circle()) // Expand tap area
+                            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1) // Better visibility
                     }
-                    .buttonStyle(ScaleButtonStyle(scale: 0.9))
-                    .padding(6) // Increased padding for easier tapping
+                    .buttonStyle(PlainButtonStyle()) // Remove animation conflicts
+                    .padding(8) // Increased padding for easier tapping
                 }
                 Spacer()
             }
