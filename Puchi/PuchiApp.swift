@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Foundation
+import Combine
+import UIKit
 
 @main
 struct PuchiApp: App {
@@ -53,9 +55,19 @@ class AppState {
     var biometricAuthEnabled = false
     var journalingGoal = 3 // entries per week
     
+    // Cleanup timer
+    private var cleanupTimer: Timer?
+    
     init() {
         loadPersistedData()
         generateSuggestions()
+        startCleanupTimer()
+        setupAppLifecycleObservers()
+    }
+    
+    deinit {
+        stopCleanupTimer()
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Entry Management Actions
@@ -300,12 +312,62 @@ class AppState {
     // MARK: - Cleanup
     private func cleanupOldDeletedEntries() {
         let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        let initialCount = recentlyDeleted.count
+        
         recentlyDeleted.removeAll { entry in
             if let deletedDate = entry.deletedDate {
                 return deletedDate < thirtyDaysAgo
             }
             return false
         }
+        
+        // Save if any items were cleaned up
+        if recentlyDeleted.count != initialCount {
+            saveData()
+        }
+    }
+    
+    private func startCleanupTimer() {
+        // Run cleanup daily at midnight
+        cleanupTimer?.invalidate()
+        cleanupTimer = Timer.scheduledTimer(withTimeInterval: 24 * 60 * 60, repeats: true) { _ in
+            self.cleanupOldDeletedEntries()
+        }
+    }
+    
+    func stopCleanupTimer() {
+        cleanupTimer?.invalidate()
+        cleanupTimer = nil
+    }
+    
+    private func setupAppLifecycleObservers() {
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleAppDidEnterBackground()
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.willTerminateNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.stopCleanupTimer()
+        }
+    }
+    
+    private func handleAppDidEnterBackground() {
+        // Save data when app goes to background
+        saveData()
+        // Stop timer to prevent background execution issues
+        stopCleanupTimer()
+    }
+    
+    @MainActor
+    func performBackgroundCleanup() async {
+        cleanupOldDeletedEntries()
     }
     
     // MARK: - Persistence

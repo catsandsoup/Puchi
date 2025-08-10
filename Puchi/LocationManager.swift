@@ -226,7 +226,7 @@ class LocationManager: NSObject, ObservableObject {
                    placemark.locality ?? 
                    "Current Location"
         
-        let address = formatAddress(from: placemark)
+        _ = formatAddress(from: placemark)
         
         return LocationInfo(
             name: name,

@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var showingResetAlert = false
+    @State private var showingRecentlyDeleted = false
     
     var body: some View {
         NavigationStack {
@@ -101,6 +102,30 @@ struct SettingsView: View {
                     // Actions Section
                     Section {
                         Button(action: {
+                            showingRecentlyDeleted = true
+                        }) {
+                            HStack {
+                                Image(systemName: "trash.circle")
+                                    .foregroundColor(.orange)
+                                Text("Recently Deleted")
+                                    .foregroundColor(.white)
+                                Spacer()
+                                if !appState.recentlyDeleted.isEmpty {
+                                    Text("\(appState.recentlyDeleted.count)")
+                                        .font(.caption)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 2)
+                                        .background(Color.orange)
+                                        .clipShape(Capsule())
+                                }
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        
+                        Button(action: {
                             showingResetAlert = true
                         }) {
                             HStack {
@@ -138,6 +163,9 @@ struct SettingsView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showingRecentlyDeleted) {
+            RecentlyDeletedView()
         }
         .alert("Reset All Data?", isPresented: $showingResetAlert) {
             Button("Reset", role: .destructive) {

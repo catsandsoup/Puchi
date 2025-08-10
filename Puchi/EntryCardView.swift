@@ -81,9 +81,9 @@ struct EntryCardView: View {
                     appState.deleteEntry(entry)
                 }
             }
-            Button("Keep", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This beautiful memory will be permanently deleted.")
+            Text("This memory will be moved to Recently Deleted where you can recover it for 30 days.")
         }
     }
 }

@@ -24,7 +24,6 @@ struct EntryComposerView: View {
     @State private var showingMoodPicker = false
     @State private var showingTagsEditor = false
     @State private var showingVoiceRecorder = false
-    @State private var richTextEditor: RichTextEditor?
     
     @FocusState private var titleFocused: Bool
     @FocusState private var contentFocused: Bool
