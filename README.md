@@ -1,89 +1,100 @@
-# Puchi
+# Puchi - Couples Journal App
 
-Puchi is an elegant iOS app designed to help couples create, cherish, and preserve their love story through digital love notes and memories.
+A comprehensive iOS journal app inspired by Apple Journal, built in SwiftUI with a focus on couples journaling and personal reflection.
+
+## 🚀 Build & Development
+
+### Prerequisites
+- Xcode 16+ 
+- iOS 17.6+ deployment target
+- iPhone 16 iOS 18.5 Simulator (recommended for testing)
+
+### Quick Build
+```bash
+./scripts/build.sh
+```
+
+### Manual Build Commands
+```bash
+# Clean build
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild clean -project Puchi.xcodeproj -scheme Puchi
+
+# Build for simulator
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project Puchi.xcodeproj -scheme Puchi -destination "platform=iOS Simulator,name=iPhone 16,OS=18.5" build
+
+# Build for device (Release)
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project Puchi.xcodeproj -scheme Puchi -destination "generic/platform=iOS" -configuration Release build
+```
+
+## 📱 App Store Release Process
+
+1. **Build & Test**: Run `./scripts/build.sh` to ensure clean builds
+2. **Archive**: Product → Archive in Xcode
+3. **Validate**: Use Organizer to validate the archive
+4. **Distribute**: Upload to App Store Connect
+5. **Review**: Submit for App Store review
+
+## 🏗️ Architecture
+
+- **Framework**: SwiftUI + @Observable pattern
+- **Data Storage**: JSON with UserDefaults, file storage for media
+- **State Management**: Centralized AppState class
+- **Theme**: Pink/purple romantic aesthetic with light/dark mode
+
+## 📂 Key Files
+
+- `PuchiApp.swift` - Main app entry point and data models
+- `TimelineView.swift` - Main journal timeline interface
+- `EntryComposerView.swift` - Journal entry creation
+- `SimpleRichTextEditor.swift` - Rich text formatting system
 
 ## ✨ Features
 
-### Digital Love Journal
-- Create and save personalized love notes
-- Add photos to capture special moments
-- Beautiful, animated floating hearts interface
-- Easy-to-use note creation system
+### Core Functionality
+- Rich journal entries with multimedia support
+- Voice recording and playback
+- Photo and media attachment
+- Location services with Apple Journal-style picker
+- Advanced search and filtering
+- Rich text formatting (Bold, Italic, Underline)
 
-### Personalized Experience
-- Customizable partner profile with photo
-- Personal welcome and onboarding flow
-- Partner name integration throughout the app
-- Elegant UI with soft, romantic color scheme
+### User Experience
+- Beautiful pink/beige romantic theme
+- Light and dark mode support
+- Smooth animations and micro-interactions
+- Accessibility compliance (VoiceOver, Dynamic Type)
+- Couples-focused journaling prompts
 
-### Smart Organization
-- Chronological history of all love notes
-- Paginated view for easy navigation
-- Smooth transitions between sections
-- Haptic feedback for enhanced interaction
+### Data & Privacy
+- Local data storage with JSON persistence
+- File-based storage for large media items
+- Comprehensive search across all entries
+- Export and sharing capabilities
 
-### Technical Highlights
-- Built with SwiftUI for iOS
-- Efficient image optimization for storage
-- User data persistence with @AppStorage
-- Responsive design that adapts to all iPhone sizes
-- Custom animations and transitions
+## 🔧 Development Notes
 
-## 🎨 Design Philosophy
+- Target user: Female, 18-30, values memory safety and aesthetic polish
+- Build with iPhone 16 simulator for primary testing
+- Test on physical device for hardware features (Face ID, GPS, etc.)
+- Follow established SwiftUI patterns and pink/beige design system
 
-Puchi embraces a warm, romantic aesthetic with:
-- Soft pink color palette
-- Rounded, friendly typography
-- Floating heart animations
-- Clean, minimalist interface
-- Thoughtful micro-interactions
+## 📋 Current Status
 
-## 🛠 Technical Stack
+See `claudeacceptance.md` for detailed implementation status and acceptance criteria.
 
-- **Framework**: SwiftUI
-- **Design Pattern**: MVVM
-- **Data Persistence**: UserDefaults/@AppStorage
-- **Image Handling**: PhotosUI
-- **Animations**: Native SwiftUI animations
-- **Haptics**: Custom haptic feedback system
+**Next Priority**: Recently Deleted View with immediate delete option for sensitive entries.
 
-## 💝 Features in Detail
+## 🐛 Troubleshooting
 
-### Welcome Experience
-- Personalized onboarding flow
-- Partner photo upload and optimization
-- Name customization
-- Animated transitions between steps
-
-### Main Interface
-- Dual-page layout with smooth pagination
-- Custom tab indicators
-- Animated heart particles
-- Responsive text input system
-
-### Note Management
-- Create and save love notes
-- Photo attachment capabilities
-- Chronological note organization
-- Interactive note viewing
-
-## 🔜 Upcoming Features
-
-- Cloud sync for notes
-- Shared couple experiences
-- More customization options
-- Additional note templates
-- Calendar integration
+- **Rich Text Issues**: See `SimpleRichTextEditor.swift:4-41` for debugging guide
+- **Build Failures**: Ensure Xcode Command Line Tools are installed: `xcode-select --install`
+- **Simulator Issues**: Reset simulator if experiencing persistent crashes
 
 ## 📱 System Requirements
 
-- iOS 17.0 or later
-- Compatible with iPhone and iPod touch
-- Optimized for iOS devices
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- iOS 17.6+ deployment target
+- iPhone and iPod touch support
+- Optimized for iOS 18.5
 
 ## 📄 License
 
