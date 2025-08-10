@@ -23,7 +23,12 @@
       "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild clean -project Puchi.xcodeproj -scheme Puchi)",
       "Bash(swift:*)",
       "Bash(grep:*)",
-      "Bash(export CG_NUMERICS_SHOW_BACKTRACE=1)"
+      "Bash(export CG_NUMERICS_SHOW_BACKTRACE=1)",
+      "Bash(rm:*)",
+      "WebFetch(domain:support.apple.com)",
+      "WebFetch(domain:support.apple.com)",
+      "Bash(pkill:*)",
+      "Bash(killall:*)"
     ],
     "deny": []
   }

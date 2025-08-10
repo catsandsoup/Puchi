@@ -10,5 +10,7 @@
 	<string>Puchi allows users to automatically record the location of their Love Note</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Puchi allows users to automatically record the location of their Love Note</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Puchi allows users to add voice notes for personalisation.</string>
 </dict>
 </plist>
