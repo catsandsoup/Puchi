@@ -464,12 +464,17 @@ struct HighlightedText: View {
     
     private var attributedText: AttributedString {
         if searchText.isEmpty {
-            return AttributedString(text)
+            // FIXED: Use themed AttributedString to prevent invisible text
+            return SimpleRichTextEditor.createThemedAttributedString(from: text)
         }
         
         let parts = text.components(separatedBy: searchText)
         if parts.count > 1 {
             let nsString = NSMutableAttributedString(string: text)
+            // LANDMARK: Ensure base text has proper theme color
+            let fullRange = NSRange(location: 0, length: nsString.length)
+            nsString.addAttribute(.foregroundColor, value: UIColor(Color.puchiText), range: fullRange)
+            
             let range = NSString(string: text).range(of: searchText, options: .caseInsensitive)
             if range.location != NSNotFound {
                 nsString.addAttribute(.backgroundColor, value: UIColor.systemPink, range: range)
@@ -477,7 +482,8 @@ struct HighlightedText: View {
             }
             return AttributedString(nsString)
         } else {
-            return AttributedString(text)
+            // FIXED: Use themed AttributedString to prevent invisible text
+            return SimpleRichTextEditor.createThemedAttributedString(from: text)
         }
     }
     

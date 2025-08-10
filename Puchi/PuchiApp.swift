@@ -498,9 +498,9 @@ struct CodableAttributedString: Codable {
     }
     
     var attributedString: AttributedString {
-        // For now, return simple AttributedString
-        // In full implementation, we'd reconstruct all formatting
-        return AttributedString(text)
+        // FIXED: Use themed AttributedString to prevent invisible text
+        // LANDMARK: This fallback ensures legacy data displays properly
+        return SimpleRichTextEditor.createThemedAttributedString(from: text)
     }
 }
 
@@ -529,7 +529,10 @@ struct LoveEntry: Identifiable, Codable {
                let attributedString = try? JSONDecoder().decode(CodableAttributedString.self, from: data).attributedString {
                 return attributedString
             }
-            return AttributedString(content)
+            // FIXED: Use themed AttributedString for fallback to prevent invisible text
+            // LANDMARK: This ensures that entries created before rich text system
+            // still display with proper colors
+            return SimpleRichTextEditor.createThemedAttributedString(from: content)
         }
         set {
             // Store both plain text and AttributedString data

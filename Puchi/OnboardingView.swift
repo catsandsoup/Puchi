@@ -16,22 +16,18 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            // Journal-style dark background
-            Color.black.ignoresSafeArea()
+            // Warm background using new color system
+            Color.puchiBackground.ignoresSafeArea()
             
             VStack(spacing: 32) {
                 Spacer()
                 
                 // App icon/logo
                 VStack(spacing: 16) {
-                    Image(systemName: "heart.text.square.fill")
-                        .font(.system(size: 64))
-                        .foregroundColor(.pink)
-                    
                     Text("💕 Puchi")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.puchiText)
                 }
                 
                 // Intro text
@@ -39,11 +35,11 @@ struct OnboardingView: View {
                     Text("Your Love Story Journal")
                         .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.puchiText)
                     
                     Text("Capture and cherish beautiful moments\nwith the one you love")
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.puchiTextSecondary)
                         .multilineTextAlignment(.center)
                 }
                 
@@ -69,10 +65,10 @@ struct OnboardingView: View {
                                 VStack(spacing: 8) {
                                     Image(systemName: "person.crop.circle.fill.badge.plus")
                                         .font(.system(size: 32))
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(.puchiTextSecondary)
                                     Text("Add Photo")
                                         .font(.caption)
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(.puchiTextSecondary)
                                 }
                             }
                         }
@@ -84,7 +80,7 @@ struct OnboardingView: View {
                             .focused($nameFieldFocused)
                             .font(.title3)
                             .fontWeight(.medium)
-                            .foregroundColor(.white)
+                            .foregroundColor(.puchiText)
                             .multilineTextAlignment(.center)
                             .textFieldStyle(PlainTextFieldStyle())
                             .onSubmit {
@@ -107,18 +103,18 @@ struct OnboardingView: View {
                     Text("Start Our Love Story")
                         .font(.headline)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.puchiText)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                         .background(
                             LinearGradient(
-                                colors: [.pink, .purple],
+                                colors: [.puchiAccent, .puchiPink],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
                         )
                         .cornerRadius(25)
-                        .shadow(color: .pink.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .shadow(color: .puchiAccent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .padding(.horizontal, 32)
                 .disabled(partnerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -130,12 +126,7 @@ struct OnboardingView: View {
         }
         .preferredColorScheme(.dark)
         .floatingHearts()
-        .onAppear {
-            // Auto-focus name field
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                nameFieldFocused = true
-            }
-        }
+        
         .onChange(of: selectedPhoto) { _, newPhoto in
             Task {
                 if let newPhoto = newPhoto,

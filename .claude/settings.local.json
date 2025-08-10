@@ -28,7 +28,9 @@
       "WebFetch(domain:support.apple.com)",
       "WebFetch(domain:support.apple.com)",
       "Bash(pkill:*)",
-      "Bash(killall:*)"
+      "Bash(killall:*)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl launch \"iPhone 16\" com.monty.Puchi)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

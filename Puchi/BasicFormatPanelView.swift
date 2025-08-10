@@ -9,6 +9,8 @@ enum BasicFormatting {
 struct BasicFormatPanelView: View {
     let onFormatApply: (BasicFormatting) -> Void
     @Environment(\.dismiss) private var dismiss
+    @State private var lastAppliedFormat: BasicFormatting?
+    @State private var showConfirmation = false
     
     var body: some View {
         NavigationView {
@@ -17,13 +19,13 @@ struct BasicFormatPanelView: View {
                 HStack {
                     Text("Format")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.puchiText)
                     Spacer()
                     Button(action: {
                         dismiss()
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.puchiTextSecondary)
                             .font(.title3)
                     }
                 }
@@ -39,45 +41,70 @@ struct BasicFormatPanelView: View {
                         BasicFormatButton(
                             title: "B",
                             subtitle: "Bold",
-                            action: { onFormatApply(.bold) }
+                            isActive: lastAppliedFormat == .bold,
+                            action: { 
+                                applyFormattingWithFeedback(.bold)
+                            }
                         )
                         
                         BasicFormatButton(
                             title: "I",
-                            subtitle: "Italic",
-                            action: { onFormatApply(.italic) }
+                            subtitle: "Italic", 
+                            isActive: lastAppliedFormat == .italic,
+                            action: { 
+                                applyFormattingWithFeedback(.italic)
+                            }
                         )
                         
                         BasicFormatButton(
                             title: "U",
                             subtitle: "Underline",
-                            action: { onFormatApply(.underline) }
+                            isActive: lastAppliedFormat == .underline,
+                            action: { 
+                                applyFormattingWithFeedback(.underline)
+                            }
                         )
                         
                         Spacer()
                     }
                     
-                    Text("Select text in your entry, then tap a format option")
+                    Text(showConfirmation ? "Formatting applied!" : "Select text in your entry, then tap a format option")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(showConfirmation ? .puchiAccent : .puchiTextSecondary)
                         .multilineTextAlignment(.center)
+                        .animation(.easeInOut(duration: 0.3), value: showConfirmation)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 32)
                 
                 Spacer()
             }
-            .background(Color.black)
+            .background(Color.puchiSurface)
             .preferredColorScheme(.dark)
         }
         .presentationDetents([.height(300)])
         .presentationDragIndicator(.visible)
+    }
+    
+    private func applyFormattingWithFeedback(_ formatting: BasicFormatting) {
+        onFormatApply(formatting)
+        lastAppliedFormat = formatting
+        showConfirmation = true
+        
+        // Reset confirmation after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                showConfirmation = false
+                lastAppliedFormat = nil
+            }
+        }
     }
 }
 
 struct BasicFormatButton: View {
     let title: String
     let subtitle: String
+    let isActive: Bool
     let action: () -> Void
     @State private var isPressed = false
     
@@ -90,19 +117,22 @@ struct BasicFormatButton: View {
             VStack(spacing: 8) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(isPressed ? Color.pink.opacity(0.3) : Color.gray.opacity(0.2))
-                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                        .fill(isActive ? Color.puchiAccent.opacity(0.8) : 
+                             (isPressed ? Color.puchiAccent.opacity(0.3) : Color.puchiHighlight))
+                        .stroke(isActive ? Color.puchiAccent : Color.puchiBorder, lineWidth: isActive ? 2 : 1)
                         .frame(width: 60, height: 60)
+                        .animation(.easeInOut(duration: 0.2), value: isActive)
                     
                     Text(title)
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(isActive ? .puchiButtonText : .puchiText)
+                        .animation(.easeInOut(duration: 0.2), value: isActive)
                 }
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.puchiTextSecondary)
             }
         }
         .scaleEffect(isPressed ? 0.95 : 1.0)
@@ -115,6 +145,10 @@ struct BasicFormatButton: View {
                 isPressed = pressing
             }
         }
+        .accessibilityLabel("\(subtitle) formatting")
+        .accessibilityHint(isActive ? "\(subtitle) formatting is currently active" : "Apply \(subtitle) formatting to selected text")
+        .accessibilityAddTraits(isActive ? [.isSelected] : [])
+        .accessibilityRemoveTraits(isActive ? [] : [.isSelected])
     }
 }
 
@@ -123,4 +157,14 @@ struct BasicFormatButton: View {
         print("Applied formatting: \(formatting)")
     }
     .preferredColorScheme(.dark)
+}
+
+// Fix for missing isActive parameter in preview
+extension BasicFormatButton {
+    init(title: String, subtitle: String, action: @escaping () -> Void) {
+        self.title = title
+        self.subtitle = subtitle
+        self.isActive = false
+        self.action = action
+    }
 }

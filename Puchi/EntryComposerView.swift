@@ -8,8 +8,10 @@ struct EntryComposerView: View {
     
     @State private var title = ""
     @State private var content = ""
-    @State private var richContent = AttributedString()
+    // LANDMARK: Initialize with proper theme color to avoid invisible text on startup
+    @State private var richContent = SimpleRichTextEditor.createThemedAttributedString(from: "")
     @State private var showingFormatPanel = false
+    @State private var showingLocationPicker = false
     @State private var mediaItems: [MediaItem] = []
     @State private var location: LocationInfo? = nil
     @State private var mood: Mood? = nil
@@ -30,7 +32,7 @@ struct EntryComposerView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.puchiBackground.ignoresSafeArea()
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
@@ -96,7 +98,7 @@ struct EntryComposerView: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(.pink)
+                    .foregroundColor(.puchiAccent)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -104,7 +106,7 @@ struct EntryComposerView: View {
                         saveEntry()
                     }
                     .fontWeight(.semibold)
-                    .foregroundColor(.pink)
+                    .foregroundColor(.puchiAccent)
                     .disabled(title.isEmpty && richContent.characters.isEmpty && mediaItems.isEmpty)
                 }
             }
@@ -114,7 +116,8 @@ struct EntryComposerView: View {
             if let editingEntry = appState.editingEntry {
                 title = editingEntry.title
                 content = editingEntry.content
-                richContent = editingEntry.attributedContent
+                // LANDMARK: Ensure loaded content has proper color attributes
+                richContent = SimpleRichTextEditor.ensureProperColorAttributes(editingEntry.attributedContent)
                 mediaItems = editingEntry.mediaItems
                 location = editingEntry.location
                 mood = editingEntry.mood
@@ -170,22 +173,22 @@ struct EntryComposerView: View {
                 applyFormatting(formatting)
             }
         }
+        .sheet(isPresented: $showingLocationPicker) {
+            LocationPickerView { selectedLocation in
+                location = selectedLocation
+            }
+        }
     }
     
     private func applyFormatting(_ formatting: BasicFormatting) {
-        // Apply formatting to rich content
+        // Apply formatting to rich content through the active text editor
         switch formatting {
         case .bold:
-            // For now, apply basic formatting by modifying the attributed string
-            var newContent = richContent
-            // Basic bold implementation - in production this would modify selected text
-            richContent = AttributedString(String(richContent.characters))
+            SimpleRichTextEditor.activeCoordinator?.applyBold()
         case .italic:
-            var newContent = richContent
-            richContent = AttributedString(String(richContent.characters))
+            SimpleRichTextEditor.activeCoordinator?.applyItalic()
         case .underline:
-            var newContent = richContent
-            richContent = AttributedString(String(richContent.characters))
+            SimpleRichTextEditor.activeCoordinator?.applyUnderline()
         }
     }
     
@@ -245,7 +248,7 @@ struct EntryComposerView: View {
             Text(DateFormatter.composerHeader.string(from: Date()))
                 .font(.title3)
                 .fontWeight(.medium)
-                .foregroundColor(.gray)
+                .foregroundColor(.puchiTextSecondary)
             Spacer()
         }
     }
@@ -256,7 +259,7 @@ struct EntryComposerView: View {
             .focused($titleFocused)
             .font(.title2)
             .fontWeight(.semibold)
-            .foregroundColor(.white)
+            .foregroundColor(.puchiText)
             .textFieldStyle(PlainTextFieldStyle())
             .onSubmit {
                 contentFocused = true
@@ -268,7 +271,7 @@ struct EntryComposerView: View {
         TextField("Start writing...", text: $content, axis: .vertical)
             .focused($contentFocused)
             .font(.body)
-            .foregroundColor(.white)
+            .foregroundColor(.puchiText)
             .textFieldStyle(PlainTextFieldStyle())
             .lineLimit(10...100)
     }
@@ -298,7 +301,7 @@ struct EntryComposerView: View {
                             mediaItems.removeAll { $0.id == item.id }
                         }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white)
+                                .foregroundColor(.puchiText)
                                 .background(Circle().fill(Color.red))
                         }
                         .padding(8)
@@ -311,9 +314,9 @@ struct EntryComposerView: View {
     private func LocationView(location: LocationInfo) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "location.fill")
-                .foregroundColor(.pink)
+                .foregroundColor(.puchiAccent)
             Text(location.name)
-                .foregroundColor(.gray)
+                .foregroundColor(.puchiTextSecondary)
             Spacer()
             Button("Remove") {
                 self.location = nil
@@ -331,13 +334,13 @@ struct EntryComposerView: View {
                 .font(.title3)
             Text("Feeling \(mood.rawValue)")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(.puchiTextSecondary)
             Spacer()
             Button("Change") {
                 showingMoodPicker = true
             }
             .font(.caption)
-            .foregroundColor(.pink)
+            .foregroundColor(.puchiAccent)
             Button("Remove") {
                 self.mood = nil
             }
@@ -355,29 +358,29 @@ struct EntryComposerView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "tag")
-                    .foregroundColor(.pink)
+                    .foregroundColor(.puchiAccent)
                 Text("Tags")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.puchiTextSecondary)
                 Spacer()
                 Button("Edit") {
                     showingTagsEditor = true
                 }
                 .font(.caption)
-                .foregroundColor(.pink)
+                .foregroundColor(.puchiAccent)
             }
             
             FlowLayout(spacing: 8) {
                 ForEach(tags, id: \.self) { tag in
                     Text("#\(tag)")
                         .font(.caption)
-                        .foregroundColor(.pink)
+                        .foregroundColor(.puchiAccent)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(
                             Capsule()
-                                .fill(Color.pink.opacity(0.1))
-                                .stroke(Color.pink.opacity(0.3), lineWidth: 1)
+                                .fill(Color.puchiAccent.opacity(0.1))
+                                .stroke(Color.puchiAccent.opacity(0.3), lineWidth: 1)
                         )
                 }
             }
@@ -394,7 +397,7 @@ struct EntryComposerView: View {
             Image(systemName: "cloud.sun")
                 .foregroundColor(.blue)
             Text(weather)
-                .foregroundColor(.gray)
+                .foregroundColor(.puchiTextSecondary)
             Spacer()
             Button("Remove") {
                 self.weather = nil
@@ -411,23 +414,26 @@ struct EntryComposerView: View {
             Text("💕 Love prompts:")
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundColor(.gray)
+                .foregroundColor(.puchiTextSecondary)
             
             LazyVStack(alignment: .leading, spacing: 8) {
                 ForEach(lovePrompts, id: \.self) { prompt in
                     Button(action: {
-                        richContent = AttributedString(prompt)
+                        // FIXED: Use themed AttributedString to prevent invisible text
+                        // LANDMARK: Always use SimpleRichTextEditor.createThemedAttributedString
+                        // when setting richContent from plain text to ensure proper colors
+                        richContent = SimpleRichTextEditor.createThemedAttributedString(from: prompt)
                         contentFocused = true
                     }) {
                         Text(prompt)
                             .font(.callout)
-                            .foregroundColor(.white)
+                            .foregroundColor(.puchiText)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
                             .background(
                                 Capsule()
-                                    .fill(Color.pink.opacity(0.2))
-                                    .stroke(Color.pink.opacity(0.5), lineWidth: 1)
+                                    .fill(Color.puchiAccent.opacity(0.2))
+                                    .stroke(Color.puchiAccent.opacity(0.5), lineWidth: 1)
                             )
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -451,7 +457,7 @@ struct EntryComposerView: View {
                 PhotosPicker(selection: $selectedPhotos, maxSelectionCount: 5, matching: .images) {
                     Image(systemName: "photo")
                         .font(.title3)
-                        .foregroundColor(.pink)
+                        .foregroundColor(.puchiAccent)
                 }
                 
                 // Camera
@@ -479,7 +485,7 @@ struct EntryComposerView: View {
                 
                 // Location
                 ToolbarButton(icon: "location", action: {
-                    location = LocationInfo(name: "Current Location", coordinate: nil)
+                    showingLocationPicker = true
                 })
                 
                 Spacer()
@@ -488,7 +494,7 @@ struct EntryComposerView: View {
                 if content.count > 50 {
                     Text("\(content.count)")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.puchiTextSecondary)
                 }
             }
             .padding(.horizontal, 20)
@@ -508,7 +514,7 @@ struct EntryComposerView: View {
                 // Handle system icons
                 Image(systemName: icon)
                     .font(.title3)
-                    .foregroundColor(.pink)
+                    .foregroundColor(.puchiAccent)
             }
         }
     }
